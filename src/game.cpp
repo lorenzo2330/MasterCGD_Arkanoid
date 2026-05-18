@@ -1,6 +1,6 @@
-#include "game.h"
 #include "colors.h"
 #include "data.h"
+#include "game.h"
 #include "game/ball.h"
 #include "game/bonus.h"
 #include "game/brick.h"
@@ -30,7 +30,7 @@ bool Game::Init(HWND hwnd)
     gameOverScreen.Init(&textRenderer, &renderer2D);
 
     NewLevel();
-
+    
     return true;
 }
 
@@ -48,12 +48,13 @@ void Game::NewLevel()
 {
     if (gameOver) { gameOver = false; currentLevel = 0; hud.SetScore(0); }
     hud.SetLevel(++currentLevel);
-    level.GenerateRandomGrid();
+    level.GenerateRandomGrid(currentLevel);
     bonuses.clear();
     balls.clear();
     racket.Reset();
-    speedMultiplier = 1.0f;
+    speedMultiplier = 1.0f + SPEED_INCREASER * currentLevel;
     SpawnBall();
+    levelHasToStart = true;
 }
 
 void Game::ApplyBonus(BonusType t)
@@ -133,6 +134,8 @@ void Game::Update(float deltaTime)
 
     if (gameOver) { HandleGameOverInput(); input.EndFrame(); return; }
 
+    if (input.IsKeyDown(VK_SPACE)) { levelHasToStart = false; }
+
     //Update della racchetta
     racket.Update(deltaTime, GetInput());
 
@@ -140,7 +143,7 @@ void Game::Update(float deltaTime)
     bool anyHitBottom = false;
     for (Ball& ball : balls) {
         bool hitBottom = false;
-        ball.Update(deltaTime, hitBottom);
+        if (levelHasToStart) { ball.UpdateBeforeStart(racket); } else { ball.Update(deltaTime, hitBottom); }
         if (hitBottom) anyHitBottom = true;
     }
 
@@ -173,6 +176,8 @@ void Game::Update(float deltaTime)
     //Tutti i blocchi distrutti -> nuovo livello
     if (level.AllDestroyed()) NewLevel();
 
+    ballPredictor.Update(balls, level, deltaTime);
+
     input.EndFrame();   //Consuma eventuali input rimanenti (click o altro)
 
 }
@@ -187,6 +192,9 @@ void Game::Render()
 
 		//Renderizza i bonus che stanno cadendo
         for (const BonusItem& b : bonuses) { if (b.on) { renderer2D.DrawRect(b.posX, b.posY, b.w, b.h, b.GetColor()); } }
+
+        //Renderizza le traiettorie (prima del rendering delle palline, così appare "sotto")
+        ballPredictor.Render(renderer2D);
 
         //Renderizza le palle
         for (const Ball& ball : balls) { if (ball.on) { renderer2D.DrawCircle(ball.posX, ball.posY, ball.r, COLOR_BALL); } }

@@ -1,13 +1,14 @@
 #pragma once
+#include "ai/ballPredictor.h"
+#include "game/ball.h"
+#include "game/bonus.h"
+#include "game/level.h"
+#include "game/racket.h"
 #include "render/renderer.h"
 #include "render/renderer2d.h"
 #include "render/textRenderer.h"
-#include "game/racket.h"
-#include "game/ball.h"
-#include "game/level.h"
-#include "game/bonus.h"
-#include "ui/hud.h"
 #include "ui/gameOverScreen.h"
+#include "ui/hud.h"
 #include "ui/inputManager.h"
 #include <vector>
 #include <windows.h>
@@ -48,7 +49,9 @@ private:
     GameOverScreen gameOverScreen;
     InputManager input;
 
-    bool  isRunning = true, gameOver = false;
+    BallPredictor ballPredictor;    //AI: predice la traiettoria della palla più pericolosa
+
+    bool  isRunning = true, gameOver = false, levelHasToStart = true;
 	float speedMultiplier = 1.0f;                   
 	int currentLevel = 0;
 

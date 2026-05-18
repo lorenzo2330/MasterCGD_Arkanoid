@@ -30,8 +30,11 @@ void GameOverScreen::Init(TextRenderer* tr, Renderer2D* r2d)
 
 GameOverScreen::Action GameOverScreen::HandleInput(const InputManager& input) const
 {
-    if (GetAsyncKeyState('R') & 0x8000) return Action::Restart;
-    if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) return Action::Quit;
+    //if (GetAsyncKeyState('R') & 0x8000) return Action::Restart;
+    //if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) return Action::Quit;
+
+    if (input.IsKeyDown('R')) return Action::Restart;     
+    if (input.IsKeyDown(VK_ESCAPE)) return Action::Quit;
 
     if (input.IsClicked(buttonRestart)) return Action::Restart;
     if (input.IsClicked(buttonQuit)) return Action::Quit;

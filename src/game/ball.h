@@ -1,5 +1,6 @@
 #pragma once
 #include "../data.h"
+#include "racket.h"
 
 class Ball {
 public:
@@ -11,7 +12,8 @@ public:
     Ball(float startX, float startY, float speed);
     ~Ball() = default;
 
-    void Update(float deltaTime, bool& hitBottom);   // hitBottom = true -> game over
+    void Update(float deltaTime, bool& hitBottom);  //Se hitBottom = true -> game over
+    void UpdateBeforeStart(Racket racket);          //Prima che inizi il livello (si muove sopra la racchetta)
 
     void Bounce(bool onX);
 

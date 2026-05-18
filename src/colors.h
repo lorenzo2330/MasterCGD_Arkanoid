@@ -9,6 +9,10 @@ struct Color {
 //Ball
 inline const Color COLOR_BALL(1.0f, 1.0f, 1.0f);
 
+//BallPredictor (AI)
+inline const Color COLOR_PREDICTOR_LINE(float progress) { return Color(0.4f, 0.85f, 1.0f, (0.6f * (1.0f - progress * 0.8f))); }
+inline const Color COLOR_PREDICTOR_END(float pulse) { return Color(0.4f, 0.85f, 1.0f, (0.35f + 0.35f * pulse)); }
+
 //Bonus
 inline const Color COLOR_BONUS_RACKET(1.0f, 0.85f, 0.0f);				//Default / Racket
 inline const Color COLOR_BONUS_BALL(0.0f, 0.9f, 1.0f);					//Bonus pallina doppia
@@ -40,5 +44,5 @@ inline const Color COLOR_GO_BUTTON_TEXT_HOVERED(1.0f, 1.0f, 1.0f);		//Testo puls
 inline const Color COLOR_HUD_TEXT(0.8f, 0.9f, 1.0f);
 
 //Racket
-inline const Color COLOR_RACKET(0.9f, 0.9f, 0.9f);
+inline const Color COLOR_RACKET(0.7f, 0.7f, 0.7f);
 

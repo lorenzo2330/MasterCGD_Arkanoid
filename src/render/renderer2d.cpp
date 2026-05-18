@@ -1,11 +1,14 @@
+#define NOMINMAX
 #pragma comment(lib, "d3d11.lib")
 #include "renderer2d.h"
 #include "../colors.h"
+#include <algorithm>
+#include <cstdlib>
 #include <d3d11.h>
 #include <d3dcommon.h>
+#include <dxgiformat.h>
 #include <string>
 #include <string.h>
-#include <dxgiformat.h>
 #include <Windows.h>
 
 bool Renderer2D::Init(ID3D11Device* device, ID3D11DeviceContext* ctx, const std::wstring& shaderDir)
@@ -125,6 +128,51 @@ void Renderer2D::DrawCircle(float x, float y, float r, Color c)
     shaderCircle.Bind(context);                 //Attivazione degli shader (slide 77)
 
     Draw(v);
+}
+
+void Renderer2D::DrawLine(float xi, float yi, float xf, float yf, float thickness, Color c)
+{
+    float cx = std::abs(xf - xi);   //Componente orizzontale
+    float cy = std::abs(yf - yi);   //Componente verticale
+    
+    if (cx <= 0.0f && cy <= 0.0f) return;  //Segmento degenere
+
+    float x, y, w, h;
+
+    //Disegna il segmento come un rettangolo, utilizzando la logica di DrawRect
+    //Nota: sarà impreciso non essendo un rettangolo esattamente in diagonale, ma essendo piccoli segmenti non si nota troppo
+    if (cy >= cx)   //Segmento prevalentemente verticale
+    {
+        float midX = (xi + xf) * 0.5f;
+        x = midX - thickness * 0.5f;
+        y = std::min(yi, yf);
+        w = thickness;
+        h = cy;
+
+        /*
+        *   xi
+      -  ┌──┼──┐ <- y = min(yi,yf)
+      |  │  │  │
+      |  │  │  │
+ cy = h  │  │<-│--- x = ((xi + xf) / 2) - w/2
+      |  │  │  │  
+      |  │  │  │
+      -  └──┼──┘
+            xf
+         |--w--| == thickness
+        */
+    }
+    else
+    {
+        //Segmento prevalentemente orizzontale
+        float midY = (yi + yf) * 0.5f;
+        x = std::min(xi, xf);
+        y = midY - thickness * 0.5f;
+        w = cx;
+        h = thickness;
+    }
+
+    DrawRect(x, y, w, h, c);
 }
 
 void Renderer2D::Shutdown()

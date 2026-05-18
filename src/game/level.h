@@ -8,9 +8,12 @@ public:
     Level() = default;
     ~Level() = default;
 
-    void GenerateRandomGrid();
+    void GenerateRandomGrid(int currentLevel);
 
     std::vector<Brick>& GetBricks() { return bricks; }
+
+    const std::vector<Brick>& GetBricksConst() const { return bricks; } //Usato dal BallPredictor per la previsione di traiettoria
+
     bool AllDestroyed() const;
 
 private:

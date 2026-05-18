@@ -1,6 +1,12 @@
-#include "shader.h"
-#include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
+#include "shader.h"
+#include <d3d11.h>
+#include <d3dcommon.h>
+#include <d3dcompiler.h>
+#include <string>
+#include <Windows.h>
+
+
 
 bool Shader::Load(ID3D11Device* device, const std::wstring& vsPath, const std::wstring& psPath)
 {

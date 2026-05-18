@@ -1,6 +1,8 @@
 #include "ball.h"
 #include "../data.h"
 #include <cstdlib>
+#include <windows.h>
+
 
 Ball::Ball(float startX, float startY, float speed){
 	this->posX = startX;
@@ -11,8 +13,16 @@ Ball::Ball(float startX, float startY, float speed){
     this->on = true;
 }
 
+void Ball::UpdateBeforeStart(Racket racket) {
+    posX = racket.CenterX();
+    posY = racket.Top() - BALL_START_DISTANCE;
+}
+
 void Ball::Update(float deltaTime, bool& hitBottom)
 {
+    if (GetAsyncKeyState('W') & 0x8000) { deltaTime /= 5; } //TODO: spostarlo, rimuoverlo o renderlo coerente (input. ...)
+    if (GetAsyncKeyState('S') & 0x8000) { deltaTime *= 5; }
+
     //Muove la pallina
     posX += velX * deltaTime;
     posY += velY * deltaTime;

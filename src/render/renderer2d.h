@@ -27,6 +27,9 @@ public:
     //Permette di disegnare i cerchi, prende posizione, dimensione e colore
     void DrawCircle(float x, float y, float r, Color c);
 
+    //Permette di disegnare dei segmenti, prende due punti, spessore del segmento e colore
+    void DrawLine(float xi, float yi, float xf, float yf, float thickness, Color c);
+
 private:
     struct Vertex { float x, y, r, g, b, a, u, v; };  //Struttura del vertice (no z perchè inutile in 2d)
 
@@ -45,4 +48,5 @@ private:
     ID3D11InputLayout* inputLayout = nullptr;
     ID3D11Buffer* vertexBuffer = nullptr;
     ID3D11BlendState* blendState = nullptr;
+
 };
