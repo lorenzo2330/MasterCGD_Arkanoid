@@ -6,6 +6,7 @@
 #include "game/brick.h"
 #include "game/utils.h"
 #include "ui/gameOverScreen.h"
+#include "ui/startScreen.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -26,10 +27,10 @@ bool Game::Init(HWND hwnd)
     if (!textRenderer.Init(renderer.GetDevice(), renderer.GetSwapChain())) { OutputDebugStringA("FAIL: TextRenderer (D2D)\n"); return false; }
 
     hud.Init(&textRenderer);
-    
     gameOverScreen.Init(&textRenderer, &renderer2D);
+    startScreen.Init(&textRenderer, &renderer2D);
 
-    NewLevel();
+    showStartScreen = true;
     
     return true;
 }
@@ -132,6 +133,24 @@ void Game::Update(float deltaTime)
 {
     if (!isRunning) return;
 
+    if (showStartScreen)
+    {
+        if (startScreen.HandleInput(input)) //True quando l'utente preme "Conferma"
+        {
+            //Recupera le informazioni selezionate dall'utente
+            StartScreenResult result = startScreen.GetResult(); 
+
+            //Comunica ai componenti le informazioni selezionate dall'utente
+            ballPredictor.SetMode(result.trajectoryMode);       
+
+            //Avvio del game
+            showStartScreen = false;
+            NewLevel();
+        }
+        input.EndFrame();
+        return;
+    }
+
     if (gameOver) { HandleGameOverInput(); input.EndFrame(); return; }
 
     if (input.IsKeyDown(VK_SPACE)) { levelHasToStart = false; }
@@ -186,11 +205,12 @@ void Game::Render()
 {
     renderer.BeginFrame();
 
-    if (!gameOver) {
+    if (showStartScreen) { startScreen.Render(input); }
+    else if (!gameOver) {
         //Renderizza i mattoncini
         for (const Brick& b : level.GetBricks()) { if (b.on) { renderer2D.DrawRect(b.posX, b.posY, b.w, b.h, b.GetColor()); } }
 
-		//Renderizza i bonus che stanno cadendo
+        //Renderizza i bonus che stanno cadendo
         for (const BonusItem& b : bonuses) { if (b.on) { renderer2D.DrawRect(b.posX, b.posY, b.w, b.h, b.GetColor()); } }
 
         //Renderizza le traiettorie (prima del rendering delle palline, così appare "sotto")
@@ -199,15 +219,15 @@ void Game::Render()
         //Renderizza le palle
         for (const Ball& ball : balls) { if (ball.on) { renderer2D.DrawCircle(ball.posX, ball.posY, ball.r, COLOR_BALL); } }
 
-		//Renderizza la raccchetta
+        //Renderizza la raccchetta
         renderer2D.DrawRect(racket.posX, racket.posY, racket.w, racket.h, COLOR_RACKET);
 
         //Renderizza HUD
         hud.Render();
     }
-    else { 
+    else {
         //Renderizza schermata di game over
-        gameOverScreen.Render(input); 
+        gameOverScreen.Render(input);
     }
 
     renderer.EndFrame();

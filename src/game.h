@@ -10,6 +10,7 @@
 #include "ui/gameOverScreen.h"
 #include "ui/hud.h"
 #include "ui/inputManager.h"
+#include "ui/startScreen.h"
 #include <vector>
 #include <windows.h>
 
@@ -47,11 +48,14 @@ private:
 
     HUD hud;
     GameOverScreen gameOverScreen;
+    StartScreen startScreen;
+    StartScreenResult result;
     InputManager input;
 
     BallPredictor ballPredictor;    //AI: predice la traiettoria della palla più pericolosa
+    //RacketAI racketAI;
 
-    bool  isRunning = true, gameOver = false, levelHasToStart = true;
+    bool  isRunning = true, gameOver = false, levelHasToStart = true, showStartScreen;
 	float speedMultiplier = 1.0f;                   
 	int currentLevel = 0;
 

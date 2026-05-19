@@ -1,8 +1,9 @@
 #define NOMINMAX 
 #include "../data.h"
+#include "../ui/inputManager.h"
 #include "racket.h"
-#include <windows.h>
 #include <algorithm>
+#include <windows.h>
 
 Racket::Racket()
 {

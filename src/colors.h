@@ -46,3 +46,9 @@ inline const Color COLOR_HUD_TEXT(0.8f, 0.9f, 1.0f);
 //Racket
 inline const Color COLOR_RACKET(0.7f, 0.7f, 0.7f);
 
+//StartScreen
+inline const Color COLOR_SS_SEPARATORLINE(0.3f, 0.3f, 0.45f);
+inline const Color COLOR_SS_HIGHLIGHTED_OPTIONROW(0.18f, 0.18f, 0.30f);
+inline const Color COLOR_SS_HIGHLIGHTED_OPTIONROW_LEFT(0.7f, 0.7f, 0.9f);
+inline const Color COLOR_SS_ARROW_UNSELECTED(0.3f, 0.3f, 0.45f);
+

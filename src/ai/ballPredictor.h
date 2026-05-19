@@ -24,6 +24,8 @@ public:
     float GetLandingX() const { return landingX; }
     bool IsActive() const { return !segments.empty(); }
 
+    void SetMode(int trajectoryMode) { mode = trajectoryMode; } //0 -> Disattivata | 1 -> Più pericolosa | 2 -> Tutte
+    
 private:
     void Simulate(Ball ball, const Level& level);
 
@@ -32,5 +34,6 @@ private:
     std::vector<Segment> segments;
     float landingX = -1.0f;
     float dashTimer = 0.0f;
-    int mode = 0;   //0 = all, 1 = solo la più pericolosa   //TODO: da settare tramite schermata iniziale
+    
+    int  mode = 0;
 };

@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="File di origine\ai">
+      <UniqueIdentifier>{e315f7ce-d648-4f78-99df-270b3fda9f58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di origine\game">
+      <UniqueIdentifier>{d4d55295-40a4-4a74-aaab-5ea73d5b2e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di origine\ui">
+      <UniqueIdentifier>{16b07637-dee9-43e0-9f9b-ab7c6ff7ba49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di origine\render">
+      <UniqueIdentifier>{5034f4a1-8600-4d0f-a83d-15b6c10177be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -21,78 +33,45 @@
     <ClCompile Include="src\game.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="src\render\renderer.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\renderer2d.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render\shader.cpp">
-      <Filter>File di origine</Filter>
+    <ClCompile Include="src\ai\ballPredictor.cpp">
+      <Filter>File di origine\ai</Filter>
     </ClCompile>
     <ClCompile Include="src\game\ball.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di origine\game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\bonus.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di origine\game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\brick.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di origine\game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\level.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di origine\game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\racket.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di origine\game</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui\gameOverScreen.cpp">
-      <Filter>File di origine</Filter>
+    <ClCompile Include="src\render\renderer.cpp">
+      <Filter>File di origine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\renderer2d.cpp">
+      <Filter>File di origine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\shader.cpp">
+      <Filter>File di origine\render</Filter>
     </ClCompile>
     <ClCompile Include="src\render\textRenderer.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di origine\render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\gameOverScreen.cpp">
+      <Filter>File di origine\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\startScreen.cpp">
+      <Filter>File di origine\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\game\ball.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\bonus.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\brick.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\level.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\racket.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
     <ClInclude Include="src\game.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderer.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\renderer2d.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\shader.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\utils.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ui\gameOverScreen.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ui\hud.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ui\inputManager.h">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render\textRenderer.h">
       <Filter>File di origine</Filter>
     </ClInclude>
     <ClInclude Include="src\colors.h">
@@ -100,6 +79,54 @@
     </ClInclude>
     <ClInclude Include="src\data.h">
       <Filter>File di origine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ai\ballPredictor.h">
+      <Filter>File di origine\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ball.h">
+      <Filter>File di origine\game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\bonus.h">
+      <Filter>File di origine\game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\brick.h">
+      <Filter>File di origine\game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\level.h">
+      <Filter>File di origine\game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\utils.h">
+      <Filter>File di origine\game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\racket.h">
+      <Filter>File di origine\game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer.h">
+      <Filter>File di origine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\renderer2d.h">
+      <Filter>File di origine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\shader.h">
+      <Filter>File di origine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\textRenderer.h">
+      <Filter>File di origine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\gameOverScreen.h">
+      <Filter>File di origine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\hud.h">
+      <Filter>File di origine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\inputManager.h">
+      <Filter>File di origine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\startScreen.h">
+      <Filter>File di origine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\uiHelper.h">
+      <Filter>File di origine\ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

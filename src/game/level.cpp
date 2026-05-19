@@ -1,7 +1,10 @@
 #include "level.h"
 #include "brick.h"
 #include "../data.h"
+#include <algorithm>
 #include <cstdlib>
+#include <memory>
+#include <vector>
 
 void Level::GenerateRandomGrid(int currentLevel)
 {
@@ -9,7 +12,7 @@ void Level::GenerateRandomGrid(int currentLevel)
     int nRighe = std::min(currentLevel, N_MAX_RIGHE);           //Avanzamento progressivo in base al livello
 
     bricks.clear();
-    bricks.reserve(nColonne * nRighe);  //Unica allocazione statica (AdvC++ lezione 2)
+    bricks.reserve(static_cast<std::vector<Brick, std::allocator<Brick>>::size_type>(nColonne) * nRighe);  //Unica allocazione statica (AdvC++ lezione 2)
 
     for (int r = 0; r < nRighe; r++) {
         for (int c = 0; c < nColonne; c++) {
@@ -27,7 +30,6 @@ bool Level::AllDestroyed() const {
 
 BrickType Level::RandomType() const
 {
-    return BrickType::Blue;
     int r = rand() % 10;
     if (r >= 0 && r < 2) return BrickType::Green;   //20% verde
 	if (r >= 2 && r < 6) return BrickType::Red;     //40% rosso

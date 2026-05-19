@@ -20,6 +20,8 @@ void BallPredictor::Update(const std::vector<Ball>& balls, const Level& level, f
     segments.clear();
     landingX = -1.0f;
 
+    if (mode == 0) return;
+
     Predict(balls, level);
 }
 
@@ -30,7 +32,7 @@ const void BallPredictor::Predict(const std::vector<Ball>& balls, const Level& l
 
     for (const Ball& b : balls) {
         if (b.on && b.velY >= 0.0f) {               //Considera solo le palline attive e che stanno cadendo
-            if (mode == 0) { Simulate(b, level); }                      //Modalità tutte le palline
+            if (mode == 2) { Simulate(b, level); }                      //Modalità tutte le palline
             else { if (b.posY > bestY) { bestY = b.posY; best = &b; } } //Modalità pallina più pericolosa (posY più "bassa")
         }
     }

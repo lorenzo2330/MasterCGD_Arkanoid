@@ -1,8 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <unordered_set>
-
-struct ButtonRect { float x, y, w, h; };
+#include "uiHelper.h"
 
 class InputManager
 {
@@ -25,10 +24,10 @@ public:
     //IsHover e IsClicked permettono di sopperire alla mancanza di pulsanti con una vera e propria logica
 
     //Controlla se il mouse è sopra al rettangolo dato
-    bool IsHover(ButtonRect b) const { return mouseX >= b.x && mouseX <= b.x + b.w && mouseY >= b.y && mouseY <= b.y + b.h; }
+    bool IsHover(UI::ButtonRect b) const { return mouseX >= b.x && mouseX <= b.x + b.w && mouseY >= b.y && mouseY <= b.y + b.h; }
 
     //Controlla se si clicca nel rettangolo
-    bool IsClicked(ButtonRect b) const { return leftButtonPressed && IsHover(b); }
+    bool IsClicked(UI::ButtonRect b) const { return leftButtonPressed && IsHover(b); }
 
 private:
     bool leftButtonPressed = false;

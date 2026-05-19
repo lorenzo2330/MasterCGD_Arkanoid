@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\ai\ballPredictor.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\game\ball.cpp" />
     <ClCompile Include="src\game\bonus.cpp" />
@@ -141,8 +142,10 @@
     <ClCompile Include="src\render\shader.cpp" />
     <ClCompile Include="src\render\textRenderer.cpp" />
     <ClCompile Include="src\ui\gameOverScreen.cpp" />
+    <ClCompile Include="src\ui\startScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ai\ballPredictor.h" />
     <ClInclude Include="src\colors.h" />
     <ClInclude Include="src\data.h" />
     <ClInclude Include="src\game.h" />
@@ -159,6 +162,8 @@
     <ClInclude Include="src\ui\gameOverScreen.h" />
     <ClInclude Include="src\ui\hud.h" />
     <ClInclude Include="src\ui\inputManager.h" />
+    <ClInclude Include="src\ui\startScreen.h" />
+    <ClInclude Include="src\ui\uiHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

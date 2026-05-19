@@ -1,7 +1,8 @@
-#include "gameOverScreen.h"
 #include "../colors.h"
 #include "../data.h"
+#include "gameOverScreen.h"
 #include "inputManager.h"
+#include "uiHelper.h"
 #include "../render/renderer2d.h"
 #include "../render/textRenderer.h"
 #include <string>
@@ -68,25 +69,6 @@ void GameOverScreen::Render(const InputManager& input) const
     textRenderer->EndDraw();
 
 	//Render pulsanti
-    DrawButton(buttonRestart, L"RESTART  (R)", input.IsHover(buttonRestart));
-    DrawButton(buttonQuit, L"QUIT  (ESC)", input.IsHover(buttonQuit));
+    UI::DrawButton(*renderer2D, *textRenderer, buttonRestart, L"RESTART  (R)", input.IsHover(buttonRestart));
+    UI::DrawButton(*renderer2D, *textRenderer, buttonQuit, L"QUIT  (ESC)", input.IsHover(buttonQuit));
 }
-
-void GameOverScreen::DrawButton(const ButtonRect& btn, const std::wstring& label, bool hovered) const
-{
-
-	//Sfondo del pulsante
-    renderer2D->DrawRect(btn.x - 2.0f, btn.y - 2.0f, btn.w + 4.0f, btn.h + 4.0f, COLOR_GO_BUTTON_BACKGROUND);
-    
-    //Interno del pulsante
-    renderer2D->DrawRect(btn.x, btn.y, btn.w, btn.h, GetButtonColor(hovered));
-
-    //Testo del pulsante
-    textRenderer->BeginDraw();
-    textRenderer->DrawCenteredText(label, btn.x, btn.y + 11.0f, btn.w, 18.0f, GetButtonTextColor(hovered));
-    textRenderer->EndDraw();
-}
-
-Color GameOverScreen::GetButtonColor(bool hovered) const { return hovered ? COLOR_GO_BUTTON_INSIDE_HOVERED : COLOR_GO_BUTTON_INSIDE; }
-
-Color GameOverScreen::GetButtonTextColor(bool hovered) const { return hovered ? COLOR_GO_BUTTON_TEXT_HOVERED : COLOR_GO_BUTTON_TEXT; }
