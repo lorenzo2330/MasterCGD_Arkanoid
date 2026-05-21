@@ -20,7 +20,7 @@ void BallPredictor::Update(const std::vector<Ball>& balls, const Level& level, f
     segments.clear();
     landingX = -1.0f;
 
-    if (mode == 0) return;
+    //if (mode == 0) return;
 
     Predict(balls, level);
 }
@@ -37,7 +37,7 @@ const void BallPredictor::Predict(const std::vector<Ball>& balls, const Level& l
         }
     }
 
-    if (best && mode == 1) { Simulate(*best, level); }
+    if (best && mode != 2) { Simulate(*best, level); }
 
 }
 

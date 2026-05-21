@@ -22,7 +22,7 @@ public:
     void Render(Renderer2D& r2d) const;
 
     float GetLandingX() const { return landingX; }
-    bool IsActive() const { return !segments.empty(); }
+    bool IsActive() const { return !segments.empty() && mode != 0; }
 
     void SetMode(int trajectoryMode) { mode = trajectoryMode; } //0 -> Disattivata | 1 -> Più pericolosa | 2 -> Tutte
     

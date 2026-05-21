@@ -6,13 +6,14 @@
 #include <string>
 #include <vector>
 #include "uiHelper.h"
+#include "../ai/racketAI.h"
 
 struct Settings { std::wstring title; std::vector<std::wstring> choices; int selectedIndex = 0; };
 
 struct StartScreenResult
 {
     int trajectoryMode = 0; //0 -> Disattivata | 1 -> Più pericolosa | 2 -> Tutte
-    //AIMode racketAIMode = AIMode::Off;
+    RacketAIMode racketAIMode = RacketAIMode::Off;
 };
 
 class StartScreen

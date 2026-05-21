@@ -29,7 +29,7 @@ Color Brick::GetColor() const
 
 BonusType Brick::GetRandomBonusType() {
     int r = rand() % 10;
-    if (r >= 0 && r < 3) return BonusType::Racket;  //30% racket
-    if (r >= 3 && r < 6) return BonusType::Ball;	//30% ball
-	return BonusType::Speed;						//40% speed
+    if (r >= 0 && r < 2) return BonusType::Racket;  //20% racket
+    if (r >= 2 && r < 7) return BonusType::Ball;	//50% ball
+	return BonusType::Speed;						//30% speed
 }

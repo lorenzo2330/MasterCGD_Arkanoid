@@ -8,7 +8,7 @@
 
 void Level::GenerateRandomGrid(int currentLevel)
 {
-    int nColonne = std::min(currentLevel * 2, N_MAX_COLONNE);   //Avanzamento progressivo in base al livello
+    int nColonne = N_MAX_COLONNE;   //Avanzamento progressivo in base al livello
     int nRighe = std::min(currentLevel, N_MAX_RIGHE);           //Avanzamento progressivo in base al livello
 
     bricks.clear();
@@ -32,6 +32,6 @@ BrickType Level::RandomType() const
 {
     int r = rand() % 10;
     if (r >= 0 && r < 2) return BrickType::Green;   //20% verde
-	if (r >= 2 && r < 6) return BrickType::Red;     //40% rosso
-	return BrickType::Blue;                         //40% blu
+	if (r >= 2 && r < 6) return BrickType::Red;     //50% rosso
+	return BrickType::Blue;                         //30% blu
 }

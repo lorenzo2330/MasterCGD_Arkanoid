@@ -69,6 +69,9 @@
     <ClCompile Include="src\ui\startScreen.cpp">
       <Filter>File di origine\ui</Filter>
     </ClCompile>
+    <ClCompile Include="src\ai\racketAI.cpp">
+      <Filter>File di origine\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="src\ui\uiHelper.h">
       <Filter>File di origine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ai\racketAI.h">
+      <Filter>File di origine\ai</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

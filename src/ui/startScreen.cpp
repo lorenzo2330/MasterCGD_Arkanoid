@@ -7,6 +7,7 @@
 #include "startScreen.h"
 #include "uiHelper.h"
 #include <Windows.h>
+#include "../ai/racketAI.h"
 
 void StartScreen::Init(TextRenderer* tr, Renderer2D* r2d)
 {
@@ -14,9 +15,9 @@ void StartScreen::Init(TextRenderer* tr, Renderer2D* r2d)
     renderer2D = r2d;
 
     settings.push_back({ L"Traiettoria palline", { L"Disattivata", L"Solo piu' pericolosa", L"Tutte" }, 0 });
-    settings.push_back({ L"Racchetta controllata dall'AI?", { L"No", L"Si, priorita' palline", L"Si, priorita' bonus", L"Si, adattiva" }, 0 });
-    settings.push_back({ L"Brick targeting?", { L"No", L"Si, predict", L"Si, green spot" }, 0 });
-    settings.push_back({ L"Pallina luminosa?", { L"No", L"Si, visibilita' alta", L"Si, visibilita' media", L"Si, visibilita' bassa"}, 0});
+    settings.push_back({ L"Racchetta controllata dall'AI?", { L"No", L"Si, priorita' palline", L"Si, adattiva" }, 0 });
+    settings.push_back({ L"Brick targeting? TODO", { L"No", L"Si, predict", L"Si, green spot" }, 0 });
+    settings.push_back({ L"Pallina luminosa? TODO", { L"No", L"Si, visibilita' alta", L"Si, visibilita' media", L"Si, visibilita' bassa"}, 0});
 }
 
 bool StartScreen::HandleInput(const InputManager& input)
@@ -65,7 +66,7 @@ StartScreenResult StartScreen::GetResult() const
     StartScreenResult r;
     if (!settings.empty()) {
         r.trajectoryMode = settings[0].selectedIndex;
-        //r.racketAIMode = static_cast<AIMode>(settings[1].selectedIndex);
+        r.racketAIMode = static_cast<RacketAIMode>(settings[1].selectedIndex);
     }
     return r;
 }
@@ -88,7 +89,7 @@ void StartScreen::Render(const InputManager& input) const
     DrawTitle();
 
     //Linea separatrice
-    renderer2D->DrawRect(px + 16.0f, py + OPTIONS_START_Y - 10.0f, SS_PANEL_W - 32.0f, 1.0f, COLOR_SS_SEPARATORLINE);
+    renderer2D->DrawRect(px + 16.0f, py + SS_OPTIONS_START_Y - 10.0f, SS_PANEL_W - 32.0f, 1.0f, COLOR_SS_SEPARATORLINE);
 
     //Righe per ogni settings
     for (int i = 0; i < static_cast<int>(settings.size()); ++i) { DrawOptionRow(i, i == selectedSetting); }
@@ -127,7 +128,7 @@ void StartScreen::DrawOptionRow(int index, bool selected) const
     //Setting selezionato
     if (selected)
     {
-        float x = SS_ROW_SELECTED_X, y = rowTopY, h = ROW_H - 8.0f;
+        float x = SS_ROW_SELECTED_X, y = rowTopY, h = SS_ROW_H - 8.0f;
 
         //Riquadro che evidenzia il setting selezionato
         renderer2D->DrawRect(x, y, SS_PANEL_W - 20.0f, h, COLOR_SS_HIGHLIGHTED_OPTIONROW);

@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\ai\ballPredictor.cpp" />
+    <ClCompile Include="src\ai\racketAI.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\game\ball.cpp" />
     <ClCompile Include="src\game\bonus.cpp" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ai\ballPredictor.h" />
+    <ClInclude Include="src\ai\racketAI.h" />
     <ClInclude Include="src\colors.h" />
     <ClInclude Include="src\data.h" />
     <ClInclude Include="src\game.h" />

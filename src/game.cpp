@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "colors.h"
 #include "data.h"
 #include "game.h"
@@ -30,7 +31,7 @@ bool Game::Init(HWND hwnd)
     gameOverScreen.Init(&textRenderer, &renderer2D);
     startScreen.Init(&textRenderer, &renderer2D);
 
-    showStartScreen = true;
+    phase = GamePhase::StartScreen;
     
     return true;
 }
@@ -43,11 +44,17 @@ void Game::Shutdown()
     renderer.Shutdown();
 }
 
+void Game::ApplySettings(const StartScreenResult& result)
+{
+    ballPredictor.SetMode(result.trajectoryMode);
+    racketAI.SetMode(result.racketAIMode);
+}
+
 void Game::SpawnBall() { balls.emplace_back(racket.CenterX(), racket.Top() - BALL_START_DISTANCE, BALL_START_SPEED * speedMultiplier); }
 
 void Game::NewLevel()
 {
-    if (gameOver) { gameOver = false; currentLevel = 0; hud.SetScore(0); }
+    //if (gameOver) { gameOver = false; currentLevel = 0; hud.SetScore(0); }
     hud.SetLevel(++currentLevel);
     level.GenerateRandomGrid(currentLevel);
     bonuses.clear();
@@ -77,6 +84,20 @@ void Game::BonusDuplicateBalls() {
 void Game::BonusIncreaseSpeed() { speedMultiplier *= BONUS_SPEED_MULTIPLIER; for (Ball& b : balls) { b.IncreaseSpeed(); } }
 
 void Game::BonusLargerRacket() { racket.WidthBonus(); }
+
+void Game::HandleGameOverInput()
+{
+    GameOverScreen::Action action = gameOverScreen.HandleInput(input);
+
+    if (action == GameOverScreen::Action::Restart) { 
+        //Torna alla StartScreen per ri-scegliere le impostazioni
+        phase = GamePhase::StartScreen;
+        currentLevel = 0;
+        hud.SetScore(0);
+        return;
+    }
+    if (action == GameOverScreen::Action::Quit) { isRunning = false; return; }
+}
 
 void Game::UpdateCollisions()
 {
@@ -121,92 +142,120 @@ void Game::UpdateCollisions()
     }
 }
 
-void Game::HandleGameOverInput()
-{
-    GameOverScreen::Action action = gameOverScreen.HandleInput(input);
+void Game::UpdateRacket(float deltaTime) {
+    if (racketAI.IsActive())
+    {
+        //L'AI calcola il centro X verso cui spostarsi
+        float targetCenterX = racketAI.ComputeTarget(level, balls, bonuses, ballPredictor, racket, deltaTime);
 
-    if (action == GameOverScreen::Action::Restart) { NewLevel(); return; }
-    if (action == GameOverScreen::Action::Quit) { isRunning = false; return; }
+        if (targetCenterX >= 0.0f)
+        {
+            //Muove la racchetta verso targetCenterX con la stessa velocità fisica del giocatore,
+            //così l'AI non è mai "magica": è limitata dalla velocità della racchetta.
+            float currentCenter = racket.CenterX();
+            float diff = targetCenterX - currentCenter;
+            float maxMove = RACKET_SPEED * deltaTime;
+
+            constexpr float DEAD_ZONE = 10.0f;
+
+            // Dead zone: se siamo già abbastanza vicini, non oscillare
+            if (std::abs(diff) > DEAD_ZONE)
+            {
+                if (std::abs(diff) <= maxMove)
+                    racket.posX = targetCenterX - racket.w * 0.5f;
+                else
+                    racket.posX += (diff > 0.0f ? 1.0f : -1.0f) * maxMove;
+
+                racket.posX = std::max(0.0f, std::min(racket.posX, SCREEN_WIDTH - racket.w));
+            }
+        }
+    }
+    else
+    {
+        //Controllo manuale normale
+        racket.Update(deltaTime, input);
+    }
 }
 
 void Game::Update(float deltaTime)
 {
+    GamePhase framePhase = phase;   //Per evitare che si entri in più if a causa del variare di phase durante l'update
+
     if (!isRunning) return;
 
-    if (showStartScreen)
+    if (framePhase == GamePhase::StartScreen)
     {
-        if (startScreen.HandleInput(input)) //True quando l'utente preme "Conferma"
+        if (startScreen.HandleInput(input))
         {
-            //Recupera le informazioni selezionate dall'utente
-            StartScreenResult result = startScreen.GetResult(); 
-
-            //Comunica ai componenti le informazioni selezionate dall'utente
-            ballPredictor.SetMode(result.trajectoryMode);       
-
-            //Avvio del game
-            showStartScreen = false;
+            //L'utente ha premuto Conferma: legge le impostazioni e avvia il gioco
+            ApplySettings(startScreen.GetResult());
             NewLevel();
+            phase = GamePhase::Playing;
         }
-        input.EndFrame();
-        return;
     }
 
-    if (gameOver) { HandleGameOverInput(); input.EndFrame(); return; }
+    if (framePhase == GamePhase::GameOver) { HandleGameOverInput(); }
 
-    if (input.IsKeyDown(VK_SPACE)) { levelHasToStart = false; }
+    if (framePhase == GamePhase::Playing) {
+        if (input.IsKeyDown(VK_SPACE) || racketAI.IsActive()) { levelHasToStart = false; }
 
-    //Update della racchetta
-    racket.Update(deltaTime, GetInput());
+        //Update della racchetta
+        //racket.Update(deltaTime, GetInput());
+        UpdateRacket(deltaTime);
 
-    //Update su ogni palla
-    bool anyHitBottom = false;
-    for (Ball& ball : balls) {
-        bool hitBottom = false;
-        if (levelHasToStart) { ball.UpdateBeforeStart(racket); } else { ball.Update(deltaTime, hitBottom); }
-        if (hitBottom) anyHitBottom = true;
+        //Update su ogni palla
+        bool anyHitBottom = false;
+        for (Ball& ball : balls) {
+            bool hitBottom = false;
+            if (levelHasToStart) { ball.UpdateBeforeStart(racket); }
+            else { ball.Update(deltaTime, hitBottom); }
+            if (hitBottom) anyHitBottom = true;
+        }
+
+        //Sposta le palle "morte" in fondo al vettore, restituisce iteratore alla prima "morta"
+        std::vector<Ball>::iterator lastBall = std::remove_if(balls.begin(), balls.end(), [](const Ball& b) { return !b.on; });
+
+        //Rimuove dal vettore tutto ciò che va da last alla fine del vettore
+        balls.erase(lastBall, balls.end());
+
+        //Se tutte le palline sono "morte" -> game over
+        if (balls.empty() && anyHitBottom) { phase = GamePhase::GameOver; gameOverScreen.SetFinalScore(hud.GetScore()); return; }
+
+        //Controlla collisioni
+        UpdateCollisions();
+
+        //Update bonus che stanno cadendo
+        for (BonusItem& bonus : bonuses) {
+            bonus.Update(deltaTime);
+
+            bool tmp;   //Serve giusto per passarlo alla funzione, non viene realmente usato
+            if (bonus.on && CheckAABB(bonus, racket, tmp, tmp)) { ApplyBonus(bonus.type); bonus.on = false; }
+        }
+
+        //Sposta i bonus "morti" in fondo al vettore, restituisce iteratore al primo "morto"
+        std::vector<BonusItem>::iterator lastBonus = std::remove_if(bonuses.begin(), bonuses.end(), [](const BonusItem& b) { return !b.on; });
+
+        //Rimuove dal vettore tutto ciò che va da last alla fine del vettore
+        bonuses.erase(lastBonus, bonuses.end());
+
+        //Tutti i blocchi distrutti -> nuovo livello
+        if (level.AllDestroyed()) NewLevel();
+
+        ballPredictor.Update(balls, level, deltaTime);
     }
-
-    //Sposta le palle "morte" in fondo al vettore, restituisce iteratore alla prima "morta"
-    std::vector<Ball>::iterator lastBall = std::remove_if(balls.begin(), balls.end(), [](const Ball& b) { return !b.on; });
-
-    //Rimuove dal vettore tutto ciò che va da last alla fine del vettore
-    balls.erase(lastBall, balls.end());
-
-    //Se tutte le palline sono "morte" -> game over
-    if (balls.empty() && anyHitBottom) { gameOver = true; gameOverScreen.SetFinalScore(hud.GetScore()); return; }
-
-	//Controlla collisioni
-    UpdateCollisions();
-
-    //Update bonus che stanno cadendo
-    for (BonusItem& bonus : bonuses) {
-        bonus.Update(deltaTime);
-
-		bool tmp;   //Serve giusto per passarlo alla funzione, non viene realmente usato
-        if (bonus.on && CheckAABB(bonus, racket, tmp, tmp)) { ApplyBonus(bonus.type); bonus.on = false; }
-    }
-
-    //Sposta i bonus "morti" in fondo al vettore, restituisce iteratore al primo "morto"
-    std::vector<BonusItem>::iterator lastBonus = std::remove_if(bonuses.begin(), bonuses.end(), [](const BonusItem& b) { return !b.on; });
-
-    //Rimuove dal vettore tutto ciò che va da last alla fine del vettore
-    bonuses.erase(lastBonus, bonuses.end());
-
-    //Tutti i blocchi distrutti -> nuovo livello
-    if (level.AllDestroyed()) NewLevel();
-
-    ballPredictor.Update(balls, level, deltaTime);
 
     input.EndFrame();   //Consuma eventuali input rimanenti (click o altro)
-
 }
 
 void Game::Render()
 {
+    GamePhase framePhase = phase;   //Per evitare che si entri in più if a causa del variare di phase durante il render
+
     renderer.BeginFrame();
 
-    if (showStartScreen) { startScreen.Render(input); }
-    else if (!gameOver) {
+    if (framePhase == GamePhase::StartScreen) { startScreen.Render(input); }
+
+    if (framePhase == GamePhase::Playing) {
         //Renderizza i mattoncini
         for (const Brick& b : level.GetBricks()) { if (b.on) { renderer2D.DrawRect(b.posX, b.posY, b.w, b.h, b.GetColor()); } }
 
@@ -214,7 +263,7 @@ void Game::Render()
         for (const BonusItem& b : bonuses) { if (b.on) { renderer2D.DrawRect(b.posX, b.posY, b.w, b.h, b.GetColor()); } }
 
         //Renderizza le traiettorie (prima del rendering delle palline, così appare "sotto")
-        ballPredictor.Render(renderer2D);
+        if (ballPredictor.IsActive()){ ballPredictor.Render(renderer2D); }
 
         //Renderizza le palle
         for (const Ball& ball : balls) { if (ball.on) { renderer2D.DrawCircle(ball.posX, ball.posY, ball.r, COLOR_BALL); } }
@@ -225,11 +274,9 @@ void Game::Render()
         //Renderizza HUD
         hud.Render();
     }
-    else {
-        //Renderizza schermata di game over
-        gameOverScreen.Render(input);
-    }
 
+    if (framePhase == GamePhase::GameOver) { gameOverScreen.Render(input); }    //Renderizza schermata di game over
+        
     renderer.EndFrame();
 }
 

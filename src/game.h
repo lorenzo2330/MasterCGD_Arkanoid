@@ -13,6 +13,9 @@
 #include "ui/startScreen.h"
 #include <vector>
 #include <windows.h>
+#include "ai/racketAI.h"
+
+enum class GamePhase { StartScreen, Playing, Pause, GameOver };
 
 class Game
 {
@@ -49,15 +52,18 @@ private:
     HUD hud;
     GameOverScreen gameOverScreen;
     StartScreen startScreen;
-    StartScreenResult result;
     InputManager input;
 
     BallPredictor ballPredictor;    //AI: predice la traiettoria della palla più pericolosa
-    //RacketAI racketAI;
+    RacketAI racketAI;
 
-    bool  isRunning = true, gameOver = false, levelHasToStart = true, showStartScreen;
+    GamePhase phase = GamePhase::StartScreen;
+
+    bool  isRunning = true, levelHasToStart = true;
 	float speedMultiplier = 1.0f;                   
 	int currentLevel = 0;
+
+    void ApplySettings(const StartScreenResult& result);
 
     void SpawnBall();
     void NewLevel();
@@ -69,5 +75,6 @@ private:
     
     void UpdateCollisions();
     void HandleGameOverInput();
-    
+
+    void UpdateRacket(float deltaTime);
 };
