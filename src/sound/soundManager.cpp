@@ -64,7 +64,7 @@ bool SoundManager::LoadAll()
 // ---------------------------------------------------------------------------
 void SoundManager::Play(SoundID id)
 {
-    if (!initialized || muted) return;
+    if (!initialized) return;
 
     //Ottiene un riferimento alla SoundEntry relativa al suono con l'id richiesto
     SoundEntry& entry = sounds[static_cast<size_t>(id)];
@@ -95,10 +95,6 @@ void SoundManager::Play(SoundID id)
     //Avvia la riproduzione vera a propria (simile a Draw())
     voice->Start();
 }
-
-void SoundManager::SetMasterVolume(float v) { volume = v; if (masterVoice && !muted){ masterVoice->SetVolume(volume); } }
-
-void SoundManager::SetMuted(bool m) { muted = m; if (masterVoice) { masterVoice->SetVolume(muted ? 0.0f : volume); } }
 
 void SoundManager::Shutdown()
 {

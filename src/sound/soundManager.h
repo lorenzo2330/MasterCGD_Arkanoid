@@ -25,11 +25,6 @@ public:
     //Riproduce il suono relativo all'id ricevuto
     void Play(SoundID id);
 
-    //Metodi per gestire il volume in maniera generale
-    void SetMasterVolume(float volume);
-    void SetMuted(bool muted);
-    bool IsMuted() const { return muted; }
-
 private:
     SoundManager() = default;
     ~SoundManager() = default;
@@ -48,6 +43,6 @@ private:
     //Array (a dimensione fissa) contenente tutte le entry di SoundID
     std::array<SoundEntry, static_cast<size_t>(SoundID::COUNT)> sounds;
 
-    bool initialized = false, muted = false;
+    bool initialized = false;
     float volume = 1.0f;
 };
