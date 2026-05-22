@@ -7,6 +7,7 @@
 #include "render/renderer.h"
 #include "render/renderer2d.h"
 #include "render/textRenderer.h"
+#include "sound/soundManager.h"
 #include "ui/gameOverScreen.h"
 #include "ui/hud.h"
 #include "ui/inputManager.h"
@@ -55,7 +56,7 @@ private:
     InputManager input;
 
     BallPredictor ballPredictor;    //AI: predice la traiettoria della palla più pericolosa
-    RacketAI racketAI;
+    RacketAI racketAI;              //AI: muove la racchetta automaticamente
 
     GamePhase phase = GamePhase::StartScreen;
 

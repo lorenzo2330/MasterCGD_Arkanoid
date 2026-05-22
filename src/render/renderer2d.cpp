@@ -1,5 +1,4 @@
 #define NOMINMAX
-#pragma comment(lib, "d3d11.lib")
 #include "renderer2d.h"
 #include "../colors.h"
 #include <algorithm>

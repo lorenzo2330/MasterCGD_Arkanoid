@@ -77,6 +77,20 @@ inline constexpr float RACKET_HEIGHT = 16.0f;
 inline constexpr float RACKET_SPEED = 400.0f;
 inline constexpr float RACKET_BONUS_WIDTH_MULTIPLIER = 2.0f;
 
+//RacketAI
+inline constexpr float AI_BONUS_BALL_WEIGHT = 5.0f;		//Pesi dei bonus (ball molto più importante)
+inline constexpr float AI_BONUS_RACKET_WEIGHT = 2.0f;
+inline constexpr float AI_BONUS_SPEED_WEIGHT = 1.0f;
+inline constexpr float AI_BONUS_DEFAULT_WEIGHT = 0.0f;
+inline constexpr float AI_BRICK_GREEN_WEIGHT = 3.0f;	//Pesi dei mattoncini (verde più importante)
+inline constexpr float AI_BRICK_RED_WEIGHT = 2.0f;
+inline constexpr float AI_BRICK_DEFAULT_WEIGHT = 1.0f;
+inline constexpr float AI_ERROR_RANGE = 10.0f;			//Spostamento rispetto al "perfetto centro" di +-10, per dare meno monotonia
+inline constexpr float AI_URGENCY_DISTANCE = 500.0f;	//Distanza di pixel entro la quale la pallina è considerata urgente
+inline constexpr float AI_ADAPTIVE_BONUS_BLEND = 0.55f;	//Peso che regola quanto seguire il bonus (1 -> segui molto)
+inline constexpr float AI_URGENCY_THRESHOLD = 0.25f;	//Percentuale di schermo nella quale la pallina è considerata safe
+inline constexpr float AI_BONUS_TIME_MARGIN = 0.75f;	//Greedy dell'ai (0 = conservativa, 1 = aggressiva)
+
 //StartScreen
 inline constexpr float SS_ROW_H = 56.0f;				//Altezza di ogni riga opzione
 inline constexpr float SS_OPTIONS_START_Y = 130.0f;		//y relativa al (top del) pannello dove iniziano le opzioni
@@ -109,16 +123,5 @@ inline constexpr float SS_BUTTON_CONFIRM_W = 200.0f;
 inline constexpr float SS_BUTTON_CONFIRM_Y = SS_PANEL_TOP + SS_PANEL_H - SS_BUTTON_CONFIRM_H - 22.0f;
 inline constexpr float SS_BUTTON_CONFIRM_X = SS_PANEL_CENTERX - SS_BUTTON_CONFIRM_W * 0.5f;
 
-//RacketAI
-inline constexpr float AI_BONUS_BALL_WEIGHT = 5.0f;		//Pesi dei bonus (ball molto più importante)
-inline constexpr float AI_BONUS_RACKET_WEIGHT = 2.0f;
-inline constexpr float AI_BONUS_SPEED_WEIGHT = 1.0f;
-inline constexpr float AI_BONUS_DEFAULT_WEIGHT = 0.0f;
-inline constexpr float AI_BRICK_GREEN_WEIGHT = 3.0f;	//Pesi dei mattoncini (verde più importante)
-inline constexpr float AI_BRICK_RED_WEIGHT = 2.0f;
-inline constexpr float AI_BRICK_DEFAULT_WEIGHT = 1.0f;
-inline constexpr float AI_ERROR_RANGE = 10.0f;			//Spostamento rispetto al "perfetto centro" di +-10, per dare meno monotonia
-inline constexpr float AI_URGENCY_DISTANCE = 500.0f;	//Distanza di pixel entro la quale la pallina è considerata urgente
-inline constexpr float AI_ADAPTIVE_BONUS_BLEND = 0.55f;	//Peso che regola quanto seguire il bonus (1 -> segui molto)
-inline constexpr float AI_URGENCY_THRESHOLD = 0.25f;	//Percentuale di schermo nella quale la pallina è considerata safe
-inline constexpr float AI_BONUS_TIME_MARGIN = 0.75f;	//Greedy dell'ai (0 = conservativa, 1 = aggressiva)
+//Sound
+static constexpr int MAX_VOICES_TOGHETHER = 10;	//Numero massimo di suoni contemporaneamente eseguibili nello stesso frame

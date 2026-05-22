@@ -19,6 +19,8 @@ public:
 
     void IncreaseSpeed() { velX *= BONUS_SPEED_MULTIPLIER; velY *= BONUS_SPEED_MULTIPLIER; }
 
+    void SoundWallBounce();
+
     //Utile per la gestione della sovrapposizione in CheckAABB(), definisce le dimensioni di una pallina
     float Left()   const { return posX - r; }
     float Right()  const { return posX + r; }

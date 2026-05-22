@@ -1,7 +1,10 @@
 #include "ball.h"
 #include "../data.h"
+#include "racket.h"
 #include <cstdlib>
 #include <windows.h>
+#include "../sound/soundBank.h"
+#include "../sound/soundManager.h"
 
 
 Ball::Ball(float startX, float startY, float speed){
@@ -30,12 +33,14 @@ void Ball::Update(float deltaTime, bool& hitBottom)
     //Re:mind: il punto (0, 0) è in alto a sinistra, y cresce verso il basso
 
     //Gestisce eventuali rimbalzi
-    if (posY - r < 0.0f) { posY = r; velY = std::abs(velY); }                           //Rimbalzo bordo sopra
-    if (posX - r < 0.0f) { posX = r; velX = std::abs(velX); }                           //Rimbalzo bordo sinistro
-	if (posX + r > SCREEN_WIDTH) { posX = SCREEN_WIDTH - r;  velX = -std::abs(velX); }  //Rimbalzo bordo destro
+    if (posY - r < 0.0f) { posY = r; velY = std::abs(velY); SoundWallBounce(); }                            //Bordo sopra
+    if (posX - r < 0.0f) { posX = r; velX = std::abs(velX); SoundWallBounce(); }                            //Bordo sinistro
+	if (posX + r > SCREEN_WIDTH) { posX = SCREEN_WIDTH - r;  velX = -std::abs(velX); SoundWallBounce(); }   //Bordo destro
     
     //Pallina tocca il bordo inferiore -> game over
     if (posY - r > SCREEN_HEIGHT) { on = false; hitBottom = true; }                   
 }
 
 void Ball::Bounce(bool onX) { if (onX) { velX = -velX; } else { velY = -velY; } }
+
+void Ball::SoundWallBounce() { SoundManager::Get().Play(SoundID::BounceWall); }

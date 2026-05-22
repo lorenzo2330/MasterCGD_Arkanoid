@@ -25,6 +25,9 @@
     <Filter Include="File di origine\render">
       <UniqueIdentifier>{5034f4a1-8600-4d0f-a83d-15b6c10177be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="File di origine\sound">
+      <UniqueIdentifier>{d728d925-887b-42ec-9c2e-bc32f4c351dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -71,6 +74,12 @@
     </ClCompile>
     <ClCompile Include="src\ai\racketAI.cpp">
       <Filter>File di origine\ai</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sound\soundClip.cpp">
+      <Filter>File di origine\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sound\soundManager.cpp">
+      <Filter>File di origine\sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="src\ai\racketAI.h">
       <Filter>File di origine\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sound\soundBank.h">
+      <Filter>File di origine\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sound\soundClip.h">
+      <Filter>File di origine\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sound\soundManager.h">
+      <Filter>File di origine\sound</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

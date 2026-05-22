@@ -1,3 +1,6 @@
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxgi.lib")
 #include "renderer.h"
 #include "../data.h"
 #include "../colors.h"
@@ -6,9 +9,6 @@
 #include <dxgi.h>
 #include <dxgiformat.h>
 #include <Windows.h>
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3dcompiler.lib")
 
 bool Renderer::Init(HWND hwnd)
 {

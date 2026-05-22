@@ -6,6 +6,8 @@
 #include "game/bonus.h"
 #include "game/brick.h"
 #include "game/utils.h"
+#include "sound/soundBank.h"
+#include "sound/soundManager.h"
 #include "ui/gameOverScreen.h"
 #include "ui/startScreen.h"
 #include <algorithm>
@@ -27,6 +29,8 @@ bool Game::Init(HWND hwnd)
     //Inizializzazione del renderer per le scritte a schermo
     if (!textRenderer.Init(renderer.GetDevice(), renderer.GetSwapChain())) { OutputDebugStringA("FAIL: TextRenderer (D2D)\n"); return false; }
 
+    if (SoundManager::Get().Init()) { OutputDebugStringA("FAIL: AudioManager \n"); }
+
     hud.Init(&textRenderer);
     gameOverScreen.Init(&textRenderer, &renderer2D);
     startScreen.Init(&textRenderer, &renderer2D);
@@ -39,6 +43,7 @@ bool Game::Init(HWND hwnd)
 void Game::Shutdown()
 {
 	//Rilascia le risorse
+    SoundManager::Get().Shutdown();
     textRenderer.Shutdown();
     renderer2D.Shutdown();
     renderer.Shutdown();
@@ -115,6 +120,8 @@ void Game::UpdateCollisions()
 
                 //(Direzione e Intensità) * Velocità verticale * Fattore di deviazione
                 ball.velX = rel * std::abs(ball.velY) * BALL_DEVIATION;
+
+                SoundManager::Get().Play(SoundID::BallHitRacket);
             }
 
             //Controllo di collisione con ogni mattoncino attivo
@@ -131,7 +138,9 @@ void Game::UpdateCollisions()
                         if (brick.type == BrickType::Blue) hud.AddScore(SCORE_BLUE);
                         if (brick.type == BrickType::Red) hud.AddScore(SCORE_RED);
                         if (brick.type == BrickType::Green) hud.AddScore(SCORE_GREEN);
+                        SoundManager::Get().Play(SoundID::BrickDestroyed);
                     }
+                    else { SoundManager::Get().Play(SoundID::BrickRedHitted); }
 
                     if (drop != BonusType::None) bonuses.emplace_back(brick.posX, brick.posY, brick.w, drop);
 
@@ -150,15 +159,12 @@ void Game::UpdateRacket(float deltaTime) {
 
         if (targetCenterX >= 0.0f)
         {
-            //Muove la racchetta verso targetCenterX con la stessa velocità fisica del giocatore,
-            //così l'AI non è mai "magica": è limitata dalla velocità della racchetta.
-            float currentCenter = racket.CenterX();
-            float diff = targetCenterX - currentCenter;
+            float diff = targetCenterX - racket.CenterX();
             float maxMove = RACKET_SPEED * deltaTime;
 
             constexpr float DEAD_ZONE = 10.0f;
 
-            // Dead zone: se siamo già abbastanza vicini, non oscillare
+            // Dead zone: se siamo già abbastanza vicini, non oscillare //TODO vedere se serve
             if (std::abs(diff) > DEAD_ZONE)
             {
                 if (std::abs(diff) <= maxMove)
@@ -219,7 +225,12 @@ void Game::Update(float deltaTime)
         balls.erase(lastBall, balls.end());
 
         //Se tutte le palline sono "morte" -> game over
-        if (balls.empty() && anyHitBottom) { phase = GamePhase::GameOver; gameOverScreen.SetFinalScore(hud.GetScore()); return; }
+        if (balls.empty() && anyHitBottom) { 
+            phase = GamePhase::GameOver; 
+            SoundManager::Get().Play(SoundID::Lose);
+            gameOverScreen.SetFinalScore(hud.GetScore()); 
+            return; 
+        }
 
         //Controlla collisioni
         UpdateCollisions();
@@ -229,7 +240,11 @@ void Game::Update(float deltaTime)
             bonus.Update(deltaTime);
 
             bool tmp;   //Serve giusto per passarlo alla funzione, non viene realmente usato
-            if (bonus.on && CheckAABB(bonus, racket, tmp, tmp)) { ApplyBonus(bonus.type); bonus.on = false; }
+            if (bonus.on && CheckAABB(bonus, racket, tmp, tmp)) { 
+                ApplyBonus(bonus.type); 
+                SoundManager::Get().Play(SoundID::Bonus);
+                bonus.on = false; 
+            }
         }
 
         //Sposta i bonus "morti" in fondo al vettore, restituisce iteratore al primo "morto"
@@ -239,7 +254,7 @@ void Game::Update(float deltaTime)
         bonuses.erase(lastBonus, bonuses.end());
 
         //Tutti i blocchi distrutti -> nuovo livello
-        if (level.AllDestroyed()) NewLevel();
+        if (level.AllDestroyed()) { SoundManager::Get().Play(SoundID::LevelUp); NewLevel(); }
 
         ballPredictor.Update(balls, level, deltaTime);
     }
