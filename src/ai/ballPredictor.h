@@ -4,7 +4,7 @@
 #include "../render/renderer2d.h"
 #include <vector>
 
-struct Segment { float xi, yi, xf, yf; };
+struct Segment { float xi, yi, xf, yf; bool isBest = false; };
 
 class BallPredictor
 {
@@ -27,7 +27,7 @@ public:
     void SetMode(int trajectoryMode) { mode = trajectoryMode; } //0 -> Disattivata | 1 -> Più pericolosa | 2 -> Tutte
     
 private:
-    void Simulate(Ball ball, const Level& level);
+    void Simulate(Ball ball, const Level& level, bool isBest = false);
 
     const void Predict(const std::vector<Ball>& balls, const Level& level);
 

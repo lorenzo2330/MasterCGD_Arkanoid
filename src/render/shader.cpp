@@ -7,6 +7,7 @@
 #include <d3dcompiler.h>
 #include <string>
 #include <Windows.h>
+#include "../data.h"
 
 
 
@@ -27,10 +28,7 @@ bool Shader::Load(ID3D11Device* device, const std::wstring& vsPath, const std::w
         &errorBlob
     );
     
-    if (FAILED(hr)) {
-        if (errorBlob) { OutputDebugStringA((char*)errorBlob->GetBufferPointer()); errorBlob->Release(); }
-        return false;
-    }
+    if (FAILED(hr)) { if (errorBlob) { ERR((char*)errorBlob->GetBufferPointer()); errorBlob->Release(); } return false; }
 
 	//Creazione vertex shader (slide 76)
     hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vs);
@@ -50,7 +48,7 @@ bool Shader::Load(ID3D11Device* device, const std::wstring& vsPath, const std::w
         &errorBlob
     );
 
-    if (FAILED(hr)) { if (errorBlob) { OutputDebugStringA((char*)errorBlob->GetBufferPointer()); errorBlob->Release(); } return false; }
+    if (FAILED(hr)) { if (errorBlob) { ERR((char*)errorBlob->GetBufferPointer()); errorBlob->Release(); } return false; }
 
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &ps);
     psBlob->Release();

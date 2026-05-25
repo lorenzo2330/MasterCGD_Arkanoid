@@ -20,4 +20,5 @@ public:
 
     //Utile per capire l'intensità del rimbalzo (maggiore se collide lontano dal centro)
     float CenterX() const { return posX + w * 0.5f; }
+    float CenterY() const { return posY + h * 0.5f; }
 };

@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "level.h"
 #include "brick.h"
 #include "../data.h"

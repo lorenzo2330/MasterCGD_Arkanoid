@@ -81,6 +81,9 @@
     <ClCompile Include="src\sound\soundManager.cpp">
       <Filter>File di origine\sound</Filter>
     </ClCompile>
+    <ClCompile Include="src\render\lightBallRenderer.cpp">
+      <Filter>File di origine\render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game.h">
@@ -151,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="src\sound\soundManager.h">
       <Filter>File di origine\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\lightBallRenderer.h">
+      <Filter>File di origine\render</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

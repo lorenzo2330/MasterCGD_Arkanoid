@@ -10,13 +10,13 @@
 bool SoundManager::Init()
 {
     //Inizializzazione XAudio2
-    if (FAILED(XAudio2Create(xaudio2.GetAddressOf(), 0, XAUDIO2_DEFAULT_PROCESSOR))){ OutputDebugStringA("[SoundManager] XAudio2Create fallito.\n"); return false; }
+    if (FAILED(XAudio2Create(xaudio2.GetAddressOf(), 0, XAUDIO2_DEFAULT_PROCESSOR))){ return ERR("[SoundManager] XAudio2Create fallito.\n"); }
 
     //Inizializzazione MasteringVoice
-    if (FAILED(xaudio2->CreateMasteringVoice(&masterVoice))) { OutputDebugStringA("[SoundManager] CreateMasteringVoice fallito.\n"); return false; }
+    if (FAILED(xaudio2->CreateMasteringVoice(&masterVoice))) { return ERR("[SoundManager] CreateMasteringVoice fallito.\n"); }
 
     //Caricamento dei file di audio
-    if (!LoadAll()) { OutputDebugStringA("[SoundManager] Uno o piu' clip non caricati. Audio parziale.\n"); }
+    if (!LoadAll()) { ERR("[SoundManager] Uno o piu' clip non caricati. Audio parziale.\n"); }
 
     initialized = true;
     
@@ -33,25 +33,17 @@ bool SoundManager::LoadAll()
         SoundEntry& entry = sounds[i];
         entry.nextVoice = 0;
 
-        // --- Carica il clip dal disco ---
-        if (!entry.clip.Load(soundPaths[i]))
-        {
-            allLoaded = false;
-            continue;   // Voci non create: Play ignorerà questo suono
-        }
+        //Carica i vari clip dal disco (se non ci riesce prosegue, quell'audio non sarà disponibile durante il gioco)
+        if (!entry.clip.Load(soundPaths[i])) { allLoaded = false; continue; }
 
-        // --- Crea il pool di SourceVoice ---
+        //Crea il pool di SourceVoice
         entry.voices.resize(MAX_VOICES_TOGHETHER, nullptr);
 
         for (int v = 0; v < MAX_VOICES_TOGHETHER; ++v)
         {
-            HRESULT hr = xaudio2->CreateSourceVoice(
-                &entry.voices[v],
-                &entry.clip.GetFormat()
-            );
-            if (FAILED(hr))
+            if (FAILED(xaudio2->CreateSourceVoice(&entry.voices[v], &entry.clip.GetFormat())))
             {
-                OutputDebugStringA("[SoundManager] CreateSourceVoice fallito per un suono.\n");
+                ERR("[SoundManager] CreateSourceVoice fallito per un suono.\n");
                 entry.voices[v] = nullptr;
                 allLoaded = false;
             }
@@ -90,7 +82,7 @@ void SoundManager::Play(SoundID id)
     buffer.Flags = XAUDIO2_END_OF_STREAM;
 
     //Carica il buffer in memoria
-    if (FAILED(voice->SubmitSourceBuffer(&buffer))) { OutputDebugStringA("[SoundManager] SubmitSourceBuffer fallito.\n"); return; }
+    if (FAILED(voice->SubmitSourceBuffer(&buffer))) { ERR("[SoundManager] SubmitSourceBuffer fallito.\n"); return; }
 
     //Avvia la riproduzione vera a propria (simile a Draw())
     voice->Start();

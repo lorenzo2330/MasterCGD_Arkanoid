@@ -9,6 +9,7 @@
 #include <string>
 #include <string.h>
 #include <Windows.h>
+#include "../game/utils.h"
 
 bool Renderer2D::Init(ID3D11Device* device, ID3D11DeviceContext* ctx, const std::wstring& shaderDir)
 {

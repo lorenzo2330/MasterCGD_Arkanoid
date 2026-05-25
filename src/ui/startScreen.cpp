@@ -16,8 +16,7 @@ void StartScreen::Init(TextRenderer* tr, Renderer2D* r2d)
 
     settings.push_back({ L"Traiettoria palline", { L"Disattivata", L"Solo piu' pericolosa", L"Tutte" }, 0 });
     settings.push_back({ L"Racchetta controllata dall'AI?", { L"No", L"Si, priorita' palline", L"Si, adattiva" }, 0 });
-    settings.push_back({ L"Brick targeting? TODO", { L"No", L"Si, predict", L"Si, green spot" }, 0 });
-    settings.push_back({ L"Pallina luminosa? TODO", { L"No", L"Si, visibilita' alta", L"Si, visibilita' media", L"Si, visibilita' bassa"}, 0});
+    settings.push_back({ L"Pallina luminosa?", { L"No", L"Si"}, 0});
 }
 
 bool StartScreen::HandleInput(const InputManager& input)
@@ -67,6 +66,7 @@ StartScreenResult StartScreen::GetResult() const
     if (!settings.empty()) {
         r.trajectoryMode = settings[0].selectedIndex;
         r.racketAIMode = static_cast<RacketAIMode>(settings[1].selectedIndex);
+        r.isLightBallMode = settings[2].selectedIndex != 0;
     }
     return r;
 }

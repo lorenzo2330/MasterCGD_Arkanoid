@@ -1,9 +1,12 @@
 #pragma once
 #include <cmath>
+#include <Windows.h>
 
 
 inline constexpr float SCREEN_WIDTH = 800.0f;
 inline constexpr float SCREEN_HEIGHT = 600.0f;
+
+inline bool ERR(LPCSTR s) { OutputDebugStringA(s); return false; }
 
 //Ball
 inline constexpr float BALL_DEVIATION = 0.85f;
@@ -68,6 +71,16 @@ inline constexpr int N_MAX_RIGHE = 5;
 inline constexpr float GRID_TOP_MARGIN = 55.0f;     
 inline constexpr float GRID_LEFT_MARGIN = 36.0f;
 
+//LightBall
+constexpr int LIGHTBALL_MAX_BALL = 8;
+constexpr int LIGHTBALL_MAX_BONUS = 8;
+constexpr float LIGHTBALL_MIN_LIGHT = 0.00f;			//Luminosità "minima" dello schermo (0.5 -> "si vedono leggermente i mattoncini")
+constexpr float LIGHTBALL_BALL_LIGHT_RADIUS = 0.35f;	//Raggio della luce
+constexpr float LIGHTBALL_RACKET_LIGHT_RADIUS = 0.25f;  
+constexpr float LIGHTBALL_BONUS_LIGHT_RADIUS = 0.20f; 
+constexpr float LIGHTBALL_BALL_POWER = 2.0f;			//Intensità della luce
+constexpr float LIGHTBALL_RACKET_POWER = 1.0f;
+constexpr float LIGHTBALL_BONUS_POWER = 2.0f;
 
 //Racchetta
 inline constexpr float RACKET_BASE_WIDTH = 120.0f;

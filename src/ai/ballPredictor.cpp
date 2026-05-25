@@ -12,15 +12,12 @@
 #include <vector>
 
 
-
 void BallPredictor::Update(const std::vector<Ball>& balls, const Level& level, float deltaTime)
 {
     dashTimer += deltaTime;
 
     segments.clear();
     landingX = -1.0f;
-
-    //if (mode == 0) return;
 
     Predict(balls, level);
 }
@@ -30,18 +27,26 @@ const void BallPredictor::Predict(const std::vector<Ball>& balls, const Level& l
     const Ball* best = nullptr;
     float bestY = 0;                //0 è il punto più alto dello schermo, quindi va bene usarlo come worst case
 
+    std::vector<const Ball*> vb = {};
+
     for (const Ball& b : balls) {
         if (b.on && b.velY >= 0.0f) {               //Considera solo le palline attive e che stanno cadendo
-            if (mode == 2) { Simulate(b, level); }                      //Modalità tutte le palline
-            else { if (b.posY > bestY) { bestY = b.posY; best = &b; } } //Modalità pallina più pericolosa (posY più "bassa")
+            vb.push_back(&b);                                   //Memorizza la pallina (utile per mode == 2
+            if (b.posY > bestY) { bestY = b.posY; best = &b; }  //Pallina più pericolosa (posY più "bassa")
         }
     }
-
-    if (best && mode != 2) { Simulate(*best, level); }
-
+    
+    //Stampa tutte le palline, con un colore diverso per la migliore
+    if (mode == 2) {
+        for (const Ball* b : vb) {
+            if (best && b->posX == best->posX && b->posY == best->posY) { Simulate(*b, level, true); }
+            else { Simulate(*b, level, false); }
+        }
+    }
+    else if (best) Simulate(*best, level, true);
 }
 
-void BallPredictor::Simulate(Ball ball, const Level& level)
+void BallPredictor::Simulate(Ball ball, const Level& level, bool isBest)
 {
     /*  Concetto: 
     *       anzichè fissare il tempo e calcolare lo spostamento al variare dello spazio
@@ -93,7 +98,7 @@ void BallPredictor::Simulate(Ball ball, const Level& level)
         }
 
         //Salva il segmento calcolato
-        segments.push_back({ prevX, prevY, ball.posX, ball.posY });
+        segments.push_back({ prevX, prevY, ball.posX, ball.posY, isBest });
 
         //Se ha raggiunto il fondo dello schermo, termina la simulazione
         if (ball.posY + ball.r >= SCREEN_HEIGHT)
@@ -119,9 +124,13 @@ void BallPredictor::Render(Renderer2D& r2d) const
 
     float accumulated = offset;
 
+    bool isBest = false;
+
     for (size_t i = 0; i < segments.size(); ++i)
     {
         const Segment& s = segments[i];
+
+        isBest = s.isBest;
 
         float dx = s.xf - s.xi;
         float dy = s.yf - s.yi;
@@ -136,7 +145,7 @@ void BallPredictor::Render(Renderer2D& r2d) const
 
             if (!dashOn) {
                 float progress = static_cast<float>(i / segments.size());   //Alpha diminuisce verso la fine della traiettoria
-                r2d.DrawLine(s.xi, s.yi, s.xf, s.yf, PREDICTOR_LINE_THICKNESS, COLOR_PREDICTOR_LINE(progress));
+                r2d.DrawLine(s.xi, s.yi, s.xf, s.yf, PREDICTOR_LINE_THICKNESS, COLOR_PREDICTOR_LINE(progress, s.isBest));
             }
         }
     }
@@ -145,6 +154,6 @@ void BallPredictor::Render(Renderer2D& r2d) const
     if (landingX >= 0.0f)
     {
         float pulse = PREDICTOR_END_PULSE(dashTimer);   //Per variare la grandezza del cerchio ("intensità")
-        r2d.DrawCircle(landingX, PREDICTOR_END_Y(pulse), PREDICTOR_END_RADIUS(pulse), COLOR_PREDICTOR_END(pulse));
+        r2d.DrawCircle(landingX, PREDICTOR_END_Y(pulse), PREDICTOR_END_RADIUS(pulse), COLOR_PREDICTOR_END(pulse, isBest));
     }
 }

@@ -22,4 +22,7 @@ public:
     float Bottom() const { return posY + h; }
 
     Color GetColor() const;
+
+    float GetCenterX() const { return posX + w * 0.5f; }
+    float GetCenterY() const { return posY + h * 0.5f; }
 };

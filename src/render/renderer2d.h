@@ -33,10 +33,6 @@ public:
 private:
     struct Vertex { float x, y, r, g, b, a, u, v; };  //Struttura del vertice (no z perchè inutile in 2d)
 
-    //Conversione tra pixel e NDC ("""spazio della GPU""")
-    float ToNDC_X(float px) const { return (px / SCREEN_WIDTH) * 2.0f - 1.0f; }
-    float ToNDC_Y(float py) const { return 1.0f - (py / SCREEN_HEIGHT) * 2.0f; }
-
     //Helper, carica i 6 vertici nel vertex buffer ed effettua una draw call alla GPU
     void Draw(const Vertex v[6]);
 

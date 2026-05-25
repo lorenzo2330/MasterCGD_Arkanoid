@@ -6,6 +6,7 @@
 #include "game/bonus.h"
 #include "game/brick.h"
 #include "game/utils.h"
+#include "render/lightBallRenderer.h"
 #include "sound/soundBank.h"
 #include "sound/soundManager.h"
 #include "ui/gameOverScreen.h"
@@ -21,15 +22,19 @@ bool Game::Init(HWND hwnd)
     srand(static_cast<unsigned>(time(nullptr)));    //Randomizza il seed per i numeri casuali
 
     //Inizializzazione del renderer principale (crea device, deviceContext, swapChain, renderTargetView, viewport)
-    if (!renderer.Init(hwnd)) { OutputDebugStringA("FAIL: Renderer DX11\n"); return false; }
+    if (!renderer.Init(hwnd)) { return ERR("FAIL: Renderer DX11\n"); }
 
 	//Inizializzazione del renderer per il gioco (usa output di renderer, crea shader, inputLayout e vertexBuffer)
-    if (!renderer2D.Init(renderer.GetDevice(), renderer.GetContext(), L"shaders\\")) { OutputDebugStringA("FAIL: Renderer2D (shader?)\n"); return false; }
+    if (!renderer2D.Init(renderer.GetDevice(), renderer.GetContext(), L"shaders\\")) { return ERR("FAIL: Renderer2D (shader?)\n"); }
 
     //Inizializzazione del renderer per le scritte a schermo
-    if (!textRenderer.Init(renderer.GetDevice(), renderer.GetSwapChain())) { OutputDebugStringA("FAIL: TextRenderer (D2D)\n"); return false; }
+    if (!textRenderer.Init(renderer.GetDevice(), renderer.GetSwapChain())) { return ERR("FAIL: TextRenderer (D2D)\n"); }
 
-    if (SoundManager::Get().Init()) { OutputDebugStringA("FAIL: AudioManager \n"); }
+    //Inizializzazione render modalità lightBall
+    if (!lightBallRenderer.Init(renderer, L"shaders\\")) { ERR("FAIL: LightBallMode non inizializzata\n"); }
+    
+    //Inizializzazione audio
+    if (SoundManager::Get().Init()) { ERR("FAIL: AudioManager \n"); }
 
     hud.Init(&textRenderer);
     gameOverScreen.Init(&textRenderer, &renderer2D);
@@ -44,6 +49,7 @@ void Game::Shutdown()
 {
 	//Rilascia le risorse
     SoundManager::Get().Shutdown();
+    lightBallRenderer.Shutdown();
     textRenderer.Shutdown();
     renderer2D.Shutdown();
     renderer.Shutdown();
@@ -53,13 +59,13 @@ void Game::ApplySettings(const StartScreenResult& result)
 {
     ballPredictor.SetMode(result.trajectoryMode);
     racketAI.SetMode(result.racketAIMode);
+    lightBallMode = result.isLightBallMode;
 }
 
 void Game::SpawnBall() { balls.emplace_back(racket.CenterX(), racket.Top() - BALL_START_DISTANCE, BALL_START_SPEED * speedMultiplier); }
 
 void Game::NewLevel()
 {
-    //if (gameOver) { gameOver = false; currentLevel = 0; hud.SetScore(0); }
     hud.SetLevel(++currentLevel);
     level.GenerateRandomGrid(currentLevel);
     bonuses.clear();
@@ -156,7 +162,8 @@ void Game::UpdateRacket(float deltaTime) {
     {
         //L'AI calcola il centro X verso cui spostarsi
         float targetCenterX = racketAI.ComputeTarget(level, balls, bonuses, ballPredictor, racket, deltaTime);
-
+        
+        //TODO vedere se serve la dead zone
         if (targetCenterX >= 0.0f)
         {
             float diff = targetCenterX - racket.CenterX();
@@ -164,7 +171,7 @@ void Game::UpdateRacket(float deltaTime) {
 
             constexpr float DEAD_ZONE = 10.0f;
 
-            // Dead zone: se siamo già abbastanza vicini, non oscillare //TODO vedere se serve
+            // Dead zone: se siamo già abbastanza vicini, non oscillare 
             if (std::abs(diff) > DEAD_ZONE)
             {
                 if (std::abs(diff) <= maxMove)
@@ -266,7 +273,10 @@ void Game::Render()
 {
     GamePhase framePhase = phase;   //Per evitare che si entri in più if a causa del variare di phase durante il render
 
-    renderer.BeginFrame();
+    bool isLightBall = lightBallMode && lightBallRenderer.IsReady() && framePhase == GamePhase::Playing;
+
+    //Invoca il render.BeginFrame() relativo alla modalità di gioco
+    if (isLightBall) { lightBallRenderer.BeginFrame(renderer); } else { renderer.BeginFrame(); }
 
     if (framePhase == GamePhase::StartScreen) { startScreen.Render(input); }
 
@@ -292,7 +302,46 @@ void Game::Render()
 
     if (framePhase == GamePhase::GameOver) { gameOverScreen.Render(input); }    //Renderizza schermata di game over
         
+    //Invoca il render.EndFrame() aggiuntivo nel caso di LightBallMode
+    if (isLightBall) { BallLightData ld = BuildLightData(); lightBallRenderer.EndFrame(renderer, ld); }
+
     renderer.EndFrame();
 }
+
+BallLightData Game::BuildLightData() const
+{
+    //Struttura con i dati necessari per il corretto rendering in lightBallRenderer
+
+    BallLightData ld = {};
+    ld.ballLightRadius = LIGHTBALL_BALL_LIGHT_RADIUS;
+    ld.bonusLightRadius = LIGHTBALL_BONUS_LIGHT_RADIUS;
+    ld.racketLightRadius = LIGHTBALL_RACKET_LIGHT_RADIUS;
+    ld.ballPower = LIGHTBALL_BALL_POWER;
+    ld.racketPower = LIGHTBALL_RACKET_POWER;
+    ld.bonusPower = LIGHTBALL_BONUS_POWER;
+
+    //Palline, memorizza le posizioni in coordinate NDC (usate dallo shader)
+    int count = std::min(static_cast<int>(balls.size()), LIGHTBALL_MAX_BALL);
+    ld.ballCount = static_cast<float>(count);
+    for (int i = 0; i < count; i++) { 
+        ld.ballPositions[i].x = ToNDC_X(balls[i].posX); 
+        ld.ballPositions[i].y = ToNDC_Y(balls[i].posY); 
+    }
+
+    //Bonus, memorizza le posizioni in coordinate NDC (usate dallo shader)
+    int bonusCount = std::min(static_cast<int>(bonuses.size()), LIGHTBALL_MAX_BONUS);
+    ld.bonusCount = static_cast<float>(bonusCount);
+    for (int i = 0; i < bonusCount; i++) { 
+        ld.bonusPositions[i].x = ToNDC_X(bonuses[i].GetCenterX()); 
+        ld.bonusPositions[i].y = ToNDC_Y(bonuses[i].GetCenterY()); 
+    }
+
+    //Racchetta, memorizza il centro in coordinate NDC (usate dallo shader)
+    ld.racketPosition.x = ToNDC_X(racket.CenterX());
+    ld.racketPosition.y = ToNDC_Y(racket.CenterY());
+
+    return ld;
+}
+
 
 

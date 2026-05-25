@@ -23,6 +23,7 @@ public:
     ID3D11Device* GetDevice()  const { return device; }
     ID3D11DeviceContext* GetContext() const { return context; }
     IDXGISwapChain* GetSwapChain()  const { return swapChain; }
+    ID3D11RenderTargetView* GetRenderTargetView() const { return rtv; }
 
 private:
     ID3D11Device* device = nullptr;     

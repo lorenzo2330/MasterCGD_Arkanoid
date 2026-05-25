@@ -138,6 +138,7 @@
     <ClCompile Include="src\game\brick.cpp" />
     <ClCompile Include="src\game\level.cpp" />
     <ClCompile Include="src\game\racket.cpp" />
+    <ClCompile Include="src\render\lightBallRenderer.cpp" />
     <ClCompile Include="src\render\renderer.cpp" />
     <ClCompile Include="src\render\renderer2d.cpp" />
     <ClCompile Include="src\render\shader.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="src\game\level.h" />
     <ClInclude Include="src\game\racket.h" />
     <ClInclude Include="src\game\utils.h" />
+    <ClInclude Include="src\render\lightBallRenderer.h" />
     <ClInclude Include="src\render\renderer.h" />
     <ClInclude Include="src\render\renderer2d.h" />
     <ClInclude Include="src\render\shader.h" />

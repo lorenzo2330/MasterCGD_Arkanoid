@@ -14,6 +14,7 @@ struct StartScreenResult
 {
     int trajectoryMode = 0; //0 -> Disattivata | 1 -> Più pericolosa | 2 -> Tutte
     RacketAIMode racketAIMode = RacketAIMode::Off;
+    bool isLightBallMode = false;
 };
 
 class StartScreen

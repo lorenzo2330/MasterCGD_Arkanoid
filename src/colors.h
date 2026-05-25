@@ -10,8 +10,14 @@ struct Color {
 inline const Color COLOR_BALL(1.0f, 1.0f, 1.0f);
 
 //BallPredictor (AI)
-inline const Color COLOR_PREDICTOR_LINE(float progress) { return Color(0.4f, 0.85f, 1.0f, (0.6f * (1.0f - progress * 0.8f))); }
-inline const Color COLOR_PREDICTOR_END(float pulse) { return Color(0.4f, 0.85f, 1.0f, (0.35f + 0.35f * pulse)); }
+inline const Color COLOR_PREDICTOR_LINE(float progress, bool isBest) {
+	if (isBest) return Color(1.0f, 0.0f, 0.0f, (0.6f * (1.0f - progress * 0.8f)));
+	else return Color(0.4f, 0.85f, 1.0f, (0.6f * (1.0f - progress * 0.8f))); 
+}
+inline const Color COLOR_PREDICTOR_END(float pulse, bool isBest) { 
+	if (isBest) return Color(1.0f, 0.0f, 0.0f, (0.35f + 0.35f * pulse));
+	return Color(0.4f, 0.85f, 1.0f, (0.35f + 0.35f * pulse)); 
+}
 
 //Bonus
 inline const Color COLOR_BONUS_RACKET(1.0f, 0.85f, 0.0f);				//Default / Racket

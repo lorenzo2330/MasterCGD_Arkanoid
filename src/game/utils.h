@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../data.h"
 
 //Calcola se c'è un'intersezione, ed eventualmente da che lato
 template<typename A, typename B>
@@ -49,3 +49,8 @@ inline bool CheckAABB(const A& a, const B& b, bool& hitSideX, bool& hitSideY)
 
     return true;
 }
+
+
+//Conversione tra pixel e NDC ("""spazio della GPU""")
+inline float ToNDC_X(float px) { return (px / SCREEN_WIDTH) * 2.0f - 1.0f; }
+inline float ToNDC_Y(float py) { return 1.0f - (py / SCREEN_HEIGHT) * 2.0f; }

@@ -14,6 +14,7 @@
 #include <vector>
 #include <windows.h>
 #include "ai/racketAI.h"
+#include "render/lightBallRenderer.h"
 
 enum class GamePhase { StartScreen, Playing, Pause, GameOver };
 
@@ -43,6 +44,7 @@ private:
     Renderer renderer;
     Renderer2D renderer2D;
     TextRenderer textRenderer;
+    LightBallRenderer lightBallRenderer;
 
     Racket racket;
     std::vector<Ball> balls;
@@ -56,10 +58,11 @@ private:
 
     BallPredictor ballPredictor;    //AI: predice la traiettoria della palla più pericolosa
     RacketAI racketAI;              //AI: muove la racchetta automaticamente
+    BallLightData BuildLightData() const;   //TODO commentare
 
     GamePhase phase = GamePhase::StartScreen;
 
-    bool  isRunning = true, levelHasToStart = true;
+    bool  isRunning = true, levelHasToStart = true, lightBallMode = false;
 	float speedMultiplier = 1.0f;                   
 	int currentLevel = 0;
 
