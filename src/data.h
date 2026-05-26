@@ -1,12 +1,16 @@
 #pragma once
 #include <cmath>
 #include <Windows.h>
+#include <string>
 
 
 inline constexpr float SCREEN_WIDTH = 800.0f;
 inline constexpr float SCREEN_HEIGHT = 600.0f;
 
 inline bool ERR(LPCSTR s) { OutputDebugStringA(s); return false; }
+inline bool ERR(LPCWSTR s) { OutputDebugStringW(s); return false; }
+inline bool ERR(const std::wstring& s) { OutputDebugStringW(s.c_str()); return false; }
+inline bool ERR(const std::string& s) { OutputDebugStringA(s.c_str()); return false; }
 
 //Ball
 inline constexpr float BALL_DEVIATION = 0.85f;
@@ -50,7 +54,7 @@ inline constexpr float SPEED_INCREASER = 0.1f;
 inline constexpr float GO_BUTTON_WIDTH = 200.0f;
 inline constexpr float GO_BUTTON_HEIGHT = 46.0f;
 inline constexpr float GO_BUTTON_GAP = 18.0f;
-inline constexpr float GO_BUTTON_START_Y = 170.0f;
+inline constexpr float GO_BUTTON_START_Y = 200.0f;
 inline constexpr float GO_FONTSIZE_TITLE = 38.0f;
 inline constexpr float GO_FONTSIZE_SCORE = 22.0f;
 inline constexpr float GO_FONTSIZE_INFO = 13.0f;

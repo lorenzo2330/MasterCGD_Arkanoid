@@ -26,5 +26,4 @@ static const wchar_t* soundPaths[static_cast<size_t>(SoundID::COUNT)] =
     L"assets\\sound\\bonus.wav",            //SoundID::Bonus
     L"assets\\sound\\level-up.wav",         //SoundID::LevelUp
     L"assets\\sound\\lose.wav",             //SoundID::Lost
-
 };

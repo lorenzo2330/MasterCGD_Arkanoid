@@ -7,6 +7,7 @@
 #include <string>
 #include <string.h>
 #include <Windows.h>
+#include "../string.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -29,10 +30,10 @@ bool LightBallRenderer::Init(Renderer& renderer, const std::wstring& shaderDir)
     ID3D11Device* device = renderer.GetDevice();
 
     //Crea il "backbackbuffer" (buffer intermedio di supporto al backbuffer)
-    if (!CreateRenderTarget(device, &bbBuffer, &sceneRTV, &sceneSRV)) { return ERR("LightBallRenderer::Init - FAIL: CreateRenderTarget (scene)\n"); }
+    if (!CreateRenderTarget(device, &bbBuffer, &sceneRTV, &sceneSRV)) { return ERR(S_ERROR_LBR_INIT_CREATERTV); }
 
     //Compilazione degli shader
-    if (!shader.Load(device, shaderDir + L"vs_fullscreen.hlsl", shaderDir + L"ps_lightball.hlsl")) return ERR("LightBallRenderer::Init - FAIL: shader\n");
+    if (!shader.Load(device, shaderDir + L"vs_fullscreen.hlsl", shaderDir + L"ps_lightball.hlsl")) { return ERR(S_ERROR_LBR_INIT_LOADSHADER); }
 
     //Constant buffer per passarsi le informazioni su palline (n, pos, ...), racchetta, bonus, ...
     D3D11_BUFFER_DESC cbd = {};
@@ -40,7 +41,7 @@ bool LightBallRenderer::Init(Renderer& renderer, const std::wstring& shaderDir)
     cbd.Usage = D3D11_USAGE_DYNAMIC;
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    if (FAILED(device->CreateBuffer(&cbd, nullptr, &lightCB))) { return ERR("LightBallRenderer::Init - FAIL: CreateBuffer (lightCB)\n"); }
+    if (FAILED(device->CreateBuffer(&cbd, nullptr, &lightCB))) { return ERR(S_ERROR_LBR_INIT_CREATEBUFFER); }
 
     //Sampler (indica come leggere la texture)
     D3D11_SAMPLER_DESC sd = {};
@@ -48,7 +49,7 @@ bool LightBallRenderer::Init(Renderer& renderer, const std::wstring& shaderDir)
     sd.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
     sd.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    if (FAILED(device->CreateSamplerState(&sd, &sampler))) { return ERR("LightBallRenderer::Init - FAIL: CreateSamplerState\n"); }
+    if (FAILED(device->CreateSamplerState(&sd, &sampler))) { return ERR(S_ERROR_LBR_INIT_CREATESAMPLER); }
 
     ready = true;
     return true;
@@ -140,7 +141,7 @@ bool LightBallRenderer::CreateRenderTarget(ID3D11Device* device, ID3D11Texture2D
     texDesc.Usage = D3D11_USAGE_DEFAULT;
     texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-    if (FAILED(device->CreateTexture2D(&texDesc, nullptr, outTex))){ return ERR("LightBallRenderer::CreateRenderTarget - FAIL: CreateTexture2D\n"); }
+    if (FAILED(device->CreateTexture2D(&texDesc, nullptr, outTex))){ return ERR(S_ERROR_LBR_CREATERT_TEXTURE); }
 
     //Setting per modalità "destinazione" (BeginFrame) -> RenderTargetView
     D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -148,7 +149,7 @@ bool LightBallRenderer::CreateRenderTarget(ID3D11Device* device, ID3D11Texture2D
     rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
     rtvDesc.Texture2D.MipSlice = 0;
 
-    if (FAILED(device->CreateRenderTargetView(*outTex, &rtvDesc, outRTV))) { return ERR("LightBallRenderer::CreateRenderTarget - FAIL: CreateRenderTargetView\n"); }
+    if (FAILED(device->CreateRenderTargetView(*outTex, &rtvDesc, outRTV))) { return ERR(S_ERROR_LBR_CREATERT_RTV); }
 
     //Setting per modalità "sorgente" (EndFrame) -> ShaderResourceView
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -157,7 +158,7 @@ bool LightBallRenderer::CreateRenderTarget(ID3D11Device* device, ID3D11Texture2D
     srvDesc.Texture2D.MostDetailedMip = 0;
     srvDesc.Texture2D.MipLevels = 1;
 
-    if (FAILED(device->CreateShaderResourceView(*outTex, &srvDesc, outSRV))) { return ERR("LightBallRenderer::CreateRenderTarget - FAIL: CreateShaderResourceView\n"); }
+    if (FAILED(device->CreateShaderResourceView(*outTex, &srvDesc, outSRV))) { return ERR(S_ERROR_LBR_CREATERT_SRV); }
 
     return true;
 }

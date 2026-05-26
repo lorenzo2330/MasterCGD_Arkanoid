@@ -49,6 +49,9 @@ inline const Color COLOR_GO_BUTTON_TEXT_HOVERED(1.0f, 1.0f, 1.0f);		//Testo puls
 //HUD
 inline const Color COLOR_HUD_TEXT(0.8f, 0.9f, 1.0f);
 
+//PauseScreen
+inline const Color COLOR_PAUSE_OVERLAY = { 0.0f, 0.0f, 0.0f, 0.55f };
+
 //Racket
 inline const Color COLOR_RACKET(0.7f, 0.7f, 0.7f);
 

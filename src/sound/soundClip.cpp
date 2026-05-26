@@ -6,6 +6,8 @@
 #include <fstream>
 #include <string>
 #include <Windows.h>
+#include "../data.h"
+#include "../string.h"
 
 //Strutture per il parsing dei file .wav
 #pragma pack(push, 1)
@@ -17,16 +19,12 @@ struct RiffHeader { RiffChunkHeader chunk; char format[4]; };
 bool SoundClip::Load(const std::wstring& path)
 {
     std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) { OutputDebugStringW((L"[SoundClip] File non trovato: " + path + L"\n").c_str()); return false; }
+    if (!file.is_open()) { return ERR(S_ERROR_SOUND_PATHNOTFOUND(path)); }
 
     // ---- RIFF header ----
     RiffHeader riff{};
     file.read(reinterpret_cast<char*>(&riff), sizeof(riff));
-    if (std::strncmp(riff.chunk.id, "RIFF", 4) != 0 || std::strncmp(riff.format, "WAVE", 4) != 0)
-    {
-        OutputDebugStringW((L"[SoundClip] Formato RIFF non valido: " + path + L"\n").c_str());
-        return false;
-    }
+    if (std::strncmp(riff.chunk.id, "RIFF", 4) != 0 || std::strncmp(riff.format, "WAVE", 4) != 0) { return ERR(S_ERROR_SOUND_RIFFNOTVALID(path)); }
 
     bool fmtFound = false;
     bool dataFound = false;
@@ -69,7 +67,7 @@ bool SoundClip::Load(const std::wstring& path)
         if (fmtFound && dataFound) break;
     }
 
-    if (!fmtFound || !dataFound) { OutputDebugStringW((L"[SoundClip] Chunk fmt/data mancante: " + path + L"\n").c_str()); return false; }
+    if (!fmtFound || !dataFound) { return ERR(S_ERROR_SOUND_CHUNKERROR(path)); }
 
     loaded = true;
     return true;

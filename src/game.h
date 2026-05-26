@@ -15,6 +15,7 @@
 #include <windows.h>
 #include "ai/racketAI.h"
 #include "render/lightBallRenderer.h"
+#include "ui/pauseScreen.h"
 
 enum class GamePhase { StartScreen, Playing, Pause, GameOver };
 
@@ -53,12 +54,13 @@ private:
 
     HUD hud;
     GameOverScreen gameOverScreen;
+    PauseScreen pauseScreen;
     StartScreen startScreen;
     InputManager input;
 
     BallPredictor ballPredictor;    //AI: predice la traiettoria della palla più pericolosa
     RacketAI racketAI;              //AI: muove la racchetta automaticamente
-    BallLightData BuildLightData() const;   //TODO commentare
+    BallLightData BuildLightData() const;
 
     GamePhase phase = GamePhase::StartScreen;
 
@@ -77,6 +79,7 @@ private:
     void BonusLargerRacket();
     
     void UpdateCollisions();
+    void HandlePauseInput();
     void HandleGameOverInput();
 
     void UpdateRacket(float deltaTime);

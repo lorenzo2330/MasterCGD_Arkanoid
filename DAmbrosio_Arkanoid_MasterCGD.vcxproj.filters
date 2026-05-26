@@ -84,6 +84,9 @@
     <ClCompile Include="src\render\lightBallRenderer.cpp">
       <Filter>File di origine\render</Filter>
     </ClCompile>
+    <ClCompile Include="src\ui\pauseScreen.cpp">
+      <Filter>File di origine\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\game.h">
@@ -157,6 +160,12 @@
     </ClInclude>
     <ClInclude Include="src\render\lightBallRenderer.h">
       <Filter>File di origine\render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui\pauseScreen.h">
+      <Filter>File di origine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\string.h">
+      <Filter>File di origine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

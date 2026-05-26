@@ -8,10 +8,16 @@
 class GameOverScreen
 {
 public:
-    enum class Action { None, Restart, Quit };
+    enum class Action { None, Restart, QuickRestart, Quit };
 
     GameOverScreen() = default;
     ~GameOverScreen() = default;
+
+    //Rule of five: se definisco distruttore, devo definire anche copy e move (FC++, lezione 7)
+    GameOverScreen(const GameOverScreen&) = delete;
+    GameOverScreen& operator=(const GameOverScreen&) = delete;
+    GameOverScreen(GameOverScreen&&) = delete;
+    GameOverScreen& operator=(GameOverScreen&&) = delete;
 
     void Init(TextRenderer* tr, Renderer2D* r2d);           //Calcola le dimensioni di pannello e pulsanti
 
@@ -26,6 +32,7 @@ private:
     TextRenderer* textRenderer = nullptr;
     Renderer2D* renderer2D = nullptr;
 
+    UI::ButtonRect buttonQuickRestart{};
     UI::ButtonRect buttonRestart{};
     UI::ButtonRect buttonQuit{};
 

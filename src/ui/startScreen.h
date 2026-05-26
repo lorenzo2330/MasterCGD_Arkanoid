@@ -24,6 +24,7 @@ public:
     StartScreen() = default;
     ~StartScreen() = default;
 
+    //Rule of five: se definisco distruttore, devo definire anche copy e move (FC++, lezione 7)
     StartScreen(const StartScreen&) = delete;
     StartScreen& operator=(const StartScreen&) = delete;
     StartScreen(StartScreen&&) = delete;

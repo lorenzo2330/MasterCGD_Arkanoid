@@ -16,28 +16,31 @@
 #include <ctime>
 #include <vector>
 #include <Windows.h>
+#include "ui/pauseScreen.h"
+#include "string.h"
 
 bool Game::Init(HWND hwnd)
 {
     srand(static_cast<unsigned>(time(nullptr)));    //Randomizza il seed per i numeri casuali
 
     //Inizializzazione del renderer principale (crea device, deviceContext, swapChain, renderTargetView, viewport)
-    if (!renderer.Init(hwnd)) { return ERR("FAIL: Renderer DX11\n"); }
+    if (!renderer.Init(hwnd)) { return ERR(S_ERROR_INIT_RENDERER); }
 
 	//Inizializzazione del renderer per il gioco (usa output di renderer, crea shader, inputLayout e vertexBuffer)
-    if (!renderer2D.Init(renderer.GetDevice(), renderer.GetContext(), L"shaders\\")) { return ERR("FAIL: Renderer2D (shader?)\n"); }
+    if (!renderer2D.Init(renderer.GetDevice(), renderer.GetContext(), S_SHADERS_PATH)) { return ERR(S_ERROR_INIT_RENDERER2D); }
 
     //Inizializzazione del renderer per le scritte a schermo
-    if (!textRenderer.Init(renderer.GetDevice(), renderer.GetSwapChain())) { return ERR("FAIL: TextRenderer (D2D)\n"); }
+    if (!textRenderer.Init(renderer.GetDevice(), renderer.GetSwapChain())) { return ERR(S_ERROR_INIT_TEXTRENDERER); }
 
     //Inizializzazione render modalità lightBall
-    if (!lightBallRenderer.Init(renderer, L"shaders\\")) { ERR("FAIL: LightBallMode non inizializzata\n"); }
+    if (!lightBallRenderer.Init(renderer, S_SHADERS_PATH)) { ERR(S_ERROR_INIT_LIGHTBALLRENDERER); }
     
     //Inizializzazione audio
-    if (SoundManager::Get().Init()) { ERR("FAIL: AudioManager \n"); }
+    if (SoundManager::Get().Init()) { ERR(S_ERROR_INIT_AUDIOMANAGER); }
 
     hud.Init(&textRenderer);
     gameOverScreen.Init(&textRenderer, &renderer2D);
+    pauseScreen.Init(&textRenderer, &renderer2D);
     startScreen.Init(&textRenderer, &renderer2D);
 
     phase = GamePhase::StartScreen;
@@ -96,17 +99,54 @@ void Game::BonusIncreaseSpeed() { speedMultiplier *= BONUS_SPEED_MULTIPLIER; for
 
 void Game::BonusLargerRacket() { racket.WidthBonus(); }
 
+void Game::HandlePauseInput() {
+    
+    pauseScreen.SetGameInfo(hud.GetScore(), currentLevel);
+    PauseScreen::Action action = pauseScreen.HandleInput(input);
+
+    if (action == PauseScreen::Action::Continue) { phase = GamePhase::Playing; return; }
+
+    if (action == PauseScreen::Action::Restart) {
+        //Torna alla StartScreen per ri-scegliere le impostazioni
+        currentLevel = 0;
+        hud.SetScore(0);
+        phase = GamePhase::StartScreen;
+        return;
+    }
+
+    if (action == PauseScreen::Action::QuickRestart) {
+        //Ricomincia un game tenendo le stesse impostazioni del game attuale
+        currentLevel = 0;
+        hud.SetScore(0);
+        NewLevel();
+        phase = GamePhase::Playing;
+        return;
+    }
+
+    if (action == PauseScreen::Action::Quit) { isRunning = false; return; }
+}
+
 void Game::HandleGameOverInput()
 {
     GameOverScreen::Action action = gameOverScreen.HandleInput(input);
 
     if (action == GameOverScreen::Action::Restart) { 
         //Torna alla StartScreen per ri-scegliere le impostazioni
-        phase = GamePhase::StartScreen;
         currentLevel = 0;
         hud.SetScore(0);
+        phase = GamePhase::StartScreen;
         return;
     }
+
+    if (action == GameOverScreen::Action::QuickRestart) {
+        //Ricomincia un game tenendo le stesse impostazioni del game attuale
+        currentLevel = 0;
+        hud.SetScore(0);
+        NewLevel();
+        phase = GamePhase::Playing;
+        return;
+    }
+
     if (action == GameOverScreen::Action::Quit) { isRunning = false; return; }
 }
 
@@ -163,7 +203,6 @@ void Game::UpdateRacket(float deltaTime) {
         //L'AI calcola il centro X verso cui spostarsi
         float targetCenterX = racketAI.ComputeTarget(level, balls, bonuses, ballPredictor, racket, deltaTime);
         
-        //TODO vedere se serve la dead zone
         if (targetCenterX >= 0.0f)
         {
             float diff = targetCenterX - racket.CenterX();
@@ -171,13 +210,11 @@ void Game::UpdateRacket(float deltaTime) {
 
             constexpr float DEAD_ZONE = 10.0f;
 
-            // Dead zone: se siamo già abbastanza vicini, non oscillare 
+            //Dead zone: evita che la racchetta oscilli a causa dell'errore indotto nel posizionamento
             if (std::abs(diff) > DEAD_ZONE)
             {
-                if (std::abs(diff) <= maxMove)
-                    racket.posX = targetCenterX - racket.w * 0.5f;
-                else
-                    racket.posX += (diff > 0.0f ? 1.0f : -1.0f) * maxMove;
+                if (std::abs(diff) <= maxMove) racket.posX = targetCenterX - racket.w * 0.5f;
+                else racket.posX += (diff > 0.0f ? 1.0f : -1.0f) * maxMove;
 
                 racket.posX = std::max(0.0f, std::min(racket.posX, SCREEN_WIDTH - racket.w));
             }
@@ -207,9 +244,8 @@ void Game::Update(float deltaTime)
         }
     }
 
-    if (framePhase == GamePhase::GameOver) { HandleGameOverInput(); }
-
     if (framePhase == GamePhase::Playing) {
+        if (input.IsKeyDown('P')) { phase = GamePhase::Pause; }
         if (input.IsKeyDown(VK_SPACE) || racketAI.IsActive()) { levelHasToStart = false; }
 
         //Update della racchetta
@@ -266,6 +302,10 @@ void Game::Update(float deltaTime)
         ballPredictor.Update(balls, level, deltaTime);
     }
 
+    if (framePhase == GamePhase::Pause) { HandlePauseInput(); }
+
+    if (framePhase == GamePhase::GameOver) { HandleGameOverInput(); }
+    
     input.EndFrame();   //Consuma eventuali input rimanenti (click o altro)
 }
 
@@ -280,7 +320,7 @@ void Game::Render()
 
     if (framePhase == GamePhase::StartScreen) { startScreen.Render(input); }
 
-    if (framePhase == GamePhase::Playing) {
+    if (framePhase == GamePhase::Playing || framePhase == GamePhase::Pause) {
         //Renderizza i mattoncini
         for (const Brick& b : level.GetBricks()) { if (b.on) { renderer2D.DrawRect(b.posX, b.posY, b.w, b.h, b.GetColor()); } }
 
@@ -299,6 +339,8 @@ void Game::Render()
         //Renderizza HUD
         hud.Render();
     }
+
+    if (framePhase == GamePhase::Pause) { pauseScreen.Render(input); }
 
     if (framePhase == GamePhase::GameOver) { gameOverScreen.Render(input); }    //Renderizza schermata di game over
         

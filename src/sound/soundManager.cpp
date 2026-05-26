@@ -4,19 +4,20 @@
 #include "SoundManager.h"
 #include <xaudio2.h>
 #include <Windows.h>
+#include "../string.h"
 
 
 
 bool SoundManager::Init()
 {
     //Inizializzazione XAudio2
-    if (FAILED(XAudio2Create(xaudio2.GetAddressOf(), 0, XAUDIO2_DEFAULT_PROCESSOR))){ return ERR("[SoundManager] XAudio2Create fallito.\n"); }
+    if (FAILED(XAudio2Create(xaudio2.GetAddressOf(), 0, XAUDIO2_DEFAULT_PROCESSOR))){ return ERR(S_ERROR_SOUND_INIT_XAUDIO2); }
 
     //Inizializzazione MasteringVoice
-    if (FAILED(xaudio2->CreateMasteringVoice(&masterVoice))) { return ERR("[SoundManager] CreateMasteringVoice fallito.\n"); }
+    if (FAILED(xaudio2->CreateMasteringVoice(&masterVoice))) { return ERR(S_ERROR_SOUND_INIT_MASTERINGVOICE); }
 
     //Caricamento dei file di audio
-    if (!LoadAll()) { ERR("[SoundManager] Uno o piu' clip non caricati. Audio parziale.\n"); }
+    if (!LoadAll()) { ERR(S_ERROR_SOUND_INIT_LOAD); }
 
     initialized = true;
     
@@ -43,7 +44,7 @@ bool SoundManager::LoadAll()
         {
             if (FAILED(xaudio2->CreateSourceVoice(&entry.voices[v], &entry.clip.GetFormat())))
             {
-                ERR("[SoundManager] CreateSourceVoice fallito per un suono.\n");
+                ERR(S_ERROR_SOUND_LOAD);
                 entry.voices[v] = nullptr;
                 allLoaded = false;
             }
@@ -82,7 +83,7 @@ void SoundManager::Play(SoundID id)
     buffer.Flags = XAUDIO2_END_OF_STREAM;
 
     //Carica il buffer in memoria
-    if (FAILED(voice->SubmitSourceBuffer(&buffer))) { ERR("[SoundManager] SubmitSourceBuffer fallito.\n"); return; }
+    if (FAILED(voice->SubmitSourceBuffer(&buffer))) { ERR(S_ERROR_SOUND_PLAY); return; }
 
     //Avvia la riproduzione vera a propria (simile a Draw())
     voice->Start();

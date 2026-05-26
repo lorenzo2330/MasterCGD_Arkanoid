@@ -1,5 +1,6 @@
 #include "src/game.h"
 #include "src/data.h"
+#include "src/string.h"
 #include <sal.h>
 #include <Windows.h>
 
@@ -35,7 +36,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In_ 
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInst;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.lpszClassName = L"ArkanoidClass";
+    wc.lpszClassName = S_MAIN_CLASSNAME;
     RegisterClassEx(&wc);
 
     //Aggiusta le dimensioni dello schermo in modo da avere una dimensione W * H
@@ -44,8 +45,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In_ 
 
     //Crea la finestra con la classe registrata sopra
     HWND hwnd = CreateWindow(
-        L"ArkanoidClass", 
-        L"Arkanoid-D'Ambrosio",
+        S_MAIN_CLASSNAME,
+        S_MAIN_WINDOWNAME,
         WS_OVERLAPPEDWINDOW & ~(WS_THICKFRAME | WS_MAXIMIZEBOX),
         CW_USEDEFAULT, 
         CW_USEDEFAULT,
@@ -61,7 +62,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInstance, _In_ 
 	UpdateWindow(hwnd);
 
 	//Inizializzazione del gioco
-    if (!gameState.Init(hwnd)) { MessageBox(hwnd, L"Inizializzazione fallita.", L"Errore", MB_OK | MB_ICONERROR); return -1; }
+    if (!gameState.Init(hwnd)) { MessageBox(hwnd, S_ERROR_INIT, S_ERROR, MB_OK | MB_ICONERROR); return -1; }
 
     //Inizializzazione del timer
     LARGE_INTEGER freq, prev, now;

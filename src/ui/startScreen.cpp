@@ -8,15 +8,16 @@
 #include "uiHelper.h"
 #include <Windows.h>
 #include "../ai/racketAI.h"
+#include "../string.h"
 
 void StartScreen::Init(TextRenderer* tr, Renderer2D* r2d)
 {
     textRenderer = tr;
     renderer2D = r2d;
 
-    settings.push_back({ L"Traiettoria palline", { L"Disattivata", L"Solo piu' pericolosa", L"Tutte" }, 0 });
-    settings.push_back({ L"Racchetta controllata dall'AI?", { L"No", L"Si, priorita' palline", L"Si, adattiva" }, 0 });
-    settings.push_back({ L"Pallina luminosa?", { L"No", L"Si"}, 0});
+    settings.push_back({ S_TRAJECTORY, { S_OFF, S_TRAJECTORY_MOSTDANGEROUS, S_TRAJECTORY_ALL }, 0 });
+    settings.push_back({ S_AIRACKET, { S_OFF, S_AIRACKET_ONLYBALL, S_AIRACKET_ADAPTIVE }, 0 });
+    settings.push_back({ S_LIGHTBALL, { S_OFF, S_ON}, 0});
 }
 
 bool StartScreen::HandleInput(const InputManager& input)
@@ -103,11 +104,11 @@ void StartScreen::Render(const InputManager& input) const
         UI::ButtonStyle lBs = input.IsHover(lRect) ? UI::ArrowButtonHovered() : UI::ArrowButton();
         UI::ButtonStyle rBs = input.IsHover(rRect) ? UI::ArrowButtonHovered() : UI::ArrowButton();
 
-        UI::DrawButton(*renderer2D, *textRenderer, lRect, L"<", lBs);
-        UI::DrawButton(*renderer2D, *textRenderer, rRect, L">", rBs);
+        UI::DrawButton(*renderer2D, *textRenderer, lRect, S_LE, lBs);
+        UI::DrawButton(*renderer2D, *textRenderer, rRect, S_GE, rBs);
     }
 
-    UI::DrawButton(*renderer2D, *textRenderer, ConfirmRect(), L"GIOCA  (ENTER)", input.IsHover(ConfirmRect()));
+    UI::DrawButton(*renderer2D, *textRenderer, ConfirmRect(), S_PLAY, input.IsHover(ConfirmRect()));
 }
 
 void StartScreen::DrawTitle() const
@@ -115,8 +116,8 @@ void StartScreen::DrawTitle() const
     UI::TextStyle TitleTs = { SS_TITLE_X, SS_TITLE_Y, SS_TITLE_W, SS_TITLE_FONT, COLOR_GO_TEXT_TITLE };
     UI::TextStyle SubtitleTs = { SS_SUBTITLE_X, SS_SUBTITLE_Y, SS_SUBTITLE_W, SS_SUBTITLE_FONT, COLOR_GO_TEXT_INFO };
 
-    UI::HDrawCenteredText(*textRenderer, L"ARKANOID", TitleTs);
-    UI::HDrawCenteredText(*textRenderer, L"Impostazioni partita", SubtitleTs);
+    UI::HDrawCenteredText(*textRenderer, S_TITLE, TitleTs);
+    UI::HDrawCenteredText(*textRenderer, S_GAMESETTINGS, SubtitleTs);
 }
 
 void StartScreen::DrawOptionRow(int index, bool selected) const
@@ -165,10 +166,10 @@ void StartScreen::DrawOptionRow(int index, bool selected) const
     if (!selected)
     {
         UI::TextStyle lArrowTs = { lRect.x, rowTopY + 2.0f, lRect.w, SS_ROW_FONTSIZE, COLOR_SS_ARROW_UNSELECTED };
-        UI::HDrawCenteredText(*textRenderer, L"<", lArrowTs);
+        UI::HDrawCenteredText(*textRenderer, S_LE, lArrowTs);
 
         UI::TextStyle rArrowTs = { rRect.x, rowTopY + 2.0f, rRect.w, SS_ROW_FONTSIZE, COLOR_SS_ARROW_UNSELECTED };
-        UI::HDrawCenteredText(*textRenderer, L">", rArrowTs);
+        UI::HDrawCenteredText(*textRenderer, S_GE, rArrowTs);
     }
 }
 

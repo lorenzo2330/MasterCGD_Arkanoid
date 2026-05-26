@@ -2,7 +2,7 @@
 #include "../colors.h"
 #include "../data.h"
 #include "../render/textRenderer.h"
-#include <string>
+#include "../string.h"
 
 class HUD
 {
@@ -27,11 +27,9 @@ public:
 
         //DrawCenteredText per evitare di calcolare ogni volta la posizione dinamicamente 
 
-        std::wstring scoreStr = L"SCORE  " + std::to_wstring(score);
-        textRenderer->DrawCenteredText(scoreStr, HUD_SCORE_X, HUD_SCORE_Y, HUD_SCORE_WIDTH, HUD_SCORE_HEIGHT, COLOR_HUD_TEXT);
+        textRenderer->DrawCenteredText(S_SCORE(score), HUD_SCORE_X, HUD_SCORE_Y, HUD_SCORE_WIDTH, HUD_SCORE_HEIGHT, COLOR_HUD_TEXT);
 
-        std::wstring levelStr = L"LEVEL  " + std::to_wstring(level);
-        textRenderer->DrawCenteredText(levelStr, HUD_LEVEL_X, HUD_LEVEL_Y, HUD_LEVEL_WIDTH, HUD_LEVEL_HEIGHT, COLOR_HUD_TEXT);
+        textRenderer->DrawCenteredText(S_LEVEL(level), HUD_LEVEL_X, HUD_LEVEL_Y, HUD_LEVEL_WIDTH, HUD_LEVEL_HEIGHT, COLOR_HUD_TEXT);
 
         textRenderer->EndDraw();
     }
