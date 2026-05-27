@@ -79,8 +79,7 @@ private:
     void BonusLargerRacket();
     
     void UpdateCollisions();
-    void HandlePauseInput();
-    void HandleGameOverInput();
+    void HandleInput(InputManager::Action input);
 
     void UpdateRacket(float deltaTime);
 };

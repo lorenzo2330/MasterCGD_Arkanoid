@@ -2,7 +2,6 @@
 #include "../data.h"
 #include "racket.h"
 #include <cstdlib>
-#include <windows.h>
 #include "../sound/soundBank.h"
 #include "../sound/soundManager.h"
 
@@ -23,9 +22,6 @@ void Ball::UpdateBeforeStart(Racket racket) {
 
 void Ball::Update(float deltaTime, bool& hitBottom)
 {
-    if (GetAsyncKeyState('W') & 0x8000) { deltaTime /= 5; } //TODO: spostarlo, rimuoverlo o renderlo coerente (input. ...)
-    if (GetAsyncKeyState('S') & 0x8000) { deltaTime *= 5; }
-
     //Muove la pallina
     posX += velX * deltaTime;
     posY += velY * deltaTime;

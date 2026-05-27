@@ -1,6 +1,5 @@
 #pragma once
 #include "../colors.h"
-#include "../data.h"
 #include "shader.h"
 #include <d3d11.h>
 #include <string>

@@ -7,8 +7,6 @@
 class PauseScreen
 {
 public:
-    enum class Action { None, Continue, Restart, QuickRestart, Quit };
-
     PauseScreen() = default;
     ~PauseScreen() = default;
 
@@ -22,7 +20,7 @@ public:
 
     void SetGameInfo(int s, int l) { score = s; level = l; }
 
-    Action HandleInput(const InputManager& input) const;
+    InputManager::Action HandleInput(const InputManager& input) const;
 
     void Render(const InputManager& input) const;
 

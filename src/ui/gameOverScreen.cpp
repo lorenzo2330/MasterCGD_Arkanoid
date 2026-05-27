@@ -5,7 +5,6 @@
 #include "uiHelper.h"
 #include "../render/renderer2d.h"
 #include "../render/textRenderer.h"
-#include <string>
 #include <windows.h>
 #include "../string.h"
 
@@ -32,17 +31,17 @@ void GameOverScreen::Init(TextRenderer* tr, Renderer2D* r2d)
     buttonQuit = { btnX, quitY, GO_BUTTON_WIDTH, GO_BUTTON_HEIGHT };
 }
 
-GameOverScreen::Action GameOverScreen::HandleInput(const InputManager& input) const
+InputManager::Action GameOverScreen::HandleInput(const InputManager& input) const
 {
-    if (input.IsKeyDown('R')) return Action::Restart;     
-    if (input.IsKeyDown('Q')) return Action::QuickRestart;     
-    if (input.IsKeyDown(VK_ESCAPE)) return Action::Quit;
+    if (input.IsKeyDown('R')) return InputManager::Action::Restart;
+    if (input.IsKeyDown('Q')) return InputManager::Action::QuickRestart;
+    if (input.IsKeyDown(VK_ESCAPE)) return InputManager::Action::Quit;
 
-    if (input.IsClicked(buttonRestart)) return Action::Restart;
-    if (input.IsClicked(buttonQuickRestart)) return Action::QuickRestart;
-    if (input.IsClicked(buttonQuit)) return Action::Quit;
+    if (input.IsClicked(buttonRestart)) return InputManager::Action::Restart;
+    if (input.IsClicked(buttonQuickRestart)) return InputManager::Action::QuickRestart;
+    if (input.IsClicked(buttonQuit)) return InputManager::Action::Quit;
 
-    return Action::None;
+    return InputManager::Action::None;
 }
 
 void GameOverScreen::Render(const InputManager& input) const

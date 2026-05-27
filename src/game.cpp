@@ -10,6 +10,7 @@
 #include "sound/soundBank.h"
 #include "sound/soundManager.h"
 #include "ui/gameOverScreen.h"
+#include "ui/inputManager.h"
 #include "ui/startScreen.h"
 #include <algorithm>
 #include <cstdlib>
@@ -99,14 +100,10 @@ void Game::BonusIncreaseSpeed() { speedMultiplier *= BONUS_SPEED_MULTIPLIER; for
 
 void Game::BonusLargerRacket() { racket.WidthBonus(); }
 
-void Game::HandlePauseInput() {
-    
-    pauseScreen.SetGameInfo(hud.GetScore(), currentLevel);
-    PauseScreen::Action action = pauseScreen.HandleInput(input);
+void Game::HandleInput(InputManager::Action input) {
+    if (input == InputManager::Action::Continue) { phase = GamePhase::Playing; return; }
 
-    if (action == PauseScreen::Action::Continue) { phase = GamePhase::Playing; return; }
-
-    if (action == PauseScreen::Action::Restart) {
+    if (input == InputManager::Action::Restart) {
         //Torna alla StartScreen per ri-scegliere le impostazioni
         currentLevel = 0;
         hud.SetScore(0);
@@ -114,7 +111,7 @@ void Game::HandlePauseInput() {
         return;
     }
 
-    if (action == PauseScreen::Action::QuickRestart) {
+    if (input == InputManager::Action::QuickRestart) {
         //Ricomincia un game tenendo le stesse impostazioni del game attuale
         currentLevel = 0;
         hud.SetScore(0);
@@ -123,31 +120,7 @@ void Game::HandlePauseInput() {
         return;
     }
 
-    if (action == PauseScreen::Action::Quit) { isRunning = false; return; }
-}
-
-void Game::HandleGameOverInput()
-{
-    GameOverScreen::Action action = gameOverScreen.HandleInput(input);
-
-    if (action == GameOverScreen::Action::Restart) { 
-        //Torna alla StartScreen per ri-scegliere le impostazioni
-        currentLevel = 0;
-        hud.SetScore(0);
-        phase = GamePhase::StartScreen;
-        return;
-    }
-
-    if (action == GameOverScreen::Action::QuickRestart) {
-        //Ricomincia un game tenendo le stesse impostazioni del game attuale
-        currentLevel = 0;
-        hud.SetScore(0);
-        NewLevel();
-        phase = GamePhase::Playing;
-        return;
-    }
-
-    if (action == GameOverScreen::Action::Quit) { isRunning = false; return; }
+    if (input == InputManager::Action::Quit) { isRunning = false; return; }
 }
 
 void Game::UpdateCollisions()
@@ -302,9 +275,9 @@ void Game::Update(float deltaTime)
         ballPredictor.Update(balls, level, deltaTime);
     }
 
-    if (framePhase == GamePhase::Pause) { HandlePauseInput(); }
+    if (framePhase == GamePhase::Pause) { pauseScreen.SetGameInfo(hud.GetScore(), currentLevel); HandleInput(pauseScreen.HandleInput(input)); }
 
-    if (framePhase == GamePhase::GameOver) { HandleGameOverInput(); }
+    if (framePhase == GamePhase::GameOver) { HandleInput(gameOverScreen.HandleInput(input)); }
     
     input.EndFrame();   //Consuma eventuali input rimanenti (click o altro)
 }

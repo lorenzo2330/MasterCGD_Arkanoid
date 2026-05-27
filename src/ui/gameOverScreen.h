@@ -4,12 +4,9 @@
 #include "inputManager.h"
 #include "uiHelper.h"
 
-
 class GameOverScreen
 {
 public:
-    enum class Action { None, Restart, QuickRestart, Quit };
-
     GameOverScreen() = default;
     ~GameOverScreen() = default;
 
@@ -23,7 +20,7 @@ public:
 
     void SetFinalScore(int score) { finalScore = score; }
 
-    Action HandleInput(const InputManager& input) const;
+    InputManager::Action HandleInput(const InputManager& input) const;
 
     void Render(const InputManager& input) const;
 

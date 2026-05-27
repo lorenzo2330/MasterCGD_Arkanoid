@@ -6,6 +6,8 @@
 class InputManager
 {
 public:
+    enum class Action { None, Continue, Restart, QuickRestart, Quit };
+
     float mouseX = 0.0f, mouseY = 0.0f;
 
 	//Gestione movimento mouse
