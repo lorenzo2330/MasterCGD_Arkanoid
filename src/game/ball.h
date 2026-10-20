@@ -21,6 +21,9 @@ public:
 
     void SoundWallBounce();
 
+    //Secondi prima che il bordo inferiore della pallina arrivi all'altezza della racchetta. Richiede velY > 0
+    float TimeToRacket() const { return (RACKET_POSY - r - posY) / velY; }
+
     //Utile per la gestione della sovrapposizione in CheckAABB(), definisce le dimensioni di una pallina
     float Left()   const { return posX - r; }
     float Right()  const { return posX + r; }

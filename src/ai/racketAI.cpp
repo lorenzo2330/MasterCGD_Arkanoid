@@ -13,12 +13,8 @@
 
 const Ball* RacketAI::FindMostDangerousBall(const std::vector<Ball>& balls) const
 {
-    const Ball* best = nullptr;
-    float bestY = -1.0f;
-
-    for (const Ball& b : balls) { if (b.on && b.velY > 0.0f && b.posY > bestY) { bestY = b.posY; best = &b; } }
-
-    return best;
+    //Stesso criterio del predittore (tempo d'impatto): così AI e traiettoria evidenziata parlano della stessa pallina
+    return BallPredictor::FindMostDangerous(balls);
 }
 
 float RacketAI::ComputeUrgency(const Ball* dangerousBall, const Racket& racket) const
@@ -108,7 +104,7 @@ float RacketAI::BestBrickTargetX(const Level& level, const Racket& racket) const
         float distanceRacketBrick = std::abs(posBrick - racket.CenterX());
         float distanceWeight = 1.0f - std::clamp(distanceRacketBrick * 3.0f / SCREEN_WIDTH, 0.0f, 1.0f);    //* 3 per penalizzare quelli lontani
 
-        //Punteggio finale (50% al tipo di mattoncino, poi 30% alla sua altezza e 20% alla distanza con la racchetta)
+        //Punteggio finale: il tipo MOLTIPLICA un termine base (0.5) corretto da altezza (peso 0.3) e vicinanza alla racchetta (peso 0.2)
         float score = typeWeight * (0.5f + 0.3f * heightWeight + 0.2f * distanceWeight);
 
         //Se è migliore dei precedenti, aggiorniamo il best
@@ -121,14 +117,22 @@ float RacketAI::AdaptiveTarget(float landingX, const std::vector<BonusItem>& bon
 {
     //-----------------------------------------Priorità 1: colpire la pallina
 
-    //Calcola la pallina più pericolosa (più bassa)
+    //Calcola la pallina più pericolosa (quella che raggiunge per prima la racchetta)
     const Ball* dangerousBall = FindMostDangerousBall(balls);
 
     //Calcola l'urgenza della pallina più pericolosa (distanza dalla racchetta)
     const float urgency = ComputeUrgency(dangerousBall, racket);
 
-    //Se "l'urgenza" è sopra la soglia, si adopera per colpirla (muovendosi al landingX (se non c'è, rimaniamo fermi))
-    if (urgency >= AI_URGENCY_THRESHOLD) { if (landingX >= 0.0f) { return landingX + RandomError(); } return -1.0f; }
+    //Urgente anche se la pallina è ancora alta, quando il tempo per coprire la distanza orizzontale sta finendo (palle oblique)
+    bool mustMoveNow = false;
+    if (dangerousBall && landingX >= 0.0f)
+    {
+        const float timeNeeded = std::abs(landingX - racket.CenterX()) / RACKET_SPEED;
+        mustMoveNow = timeNeeded >= dangerousBall->TimeToRacket() * AI_BONUS_TIME_MARGIN;
+    }
+
+    //Se "l'urgenza" è sopra la soglia (o non c'è più margine di tempo), si adopera per colpirla (muovendosi al landingX (se non c'è, rimaniamo fermi))
+    if (urgency >= AI_URGENCY_THRESHOLD || mustMoveNow) { if (landingX >= 0.0f) { return AimAt(landingX, racket); } return -1.0f; }
 
     //(la pallina è abbastanza distante, prossima priorità)
 
@@ -143,8 +147,8 @@ float RacketAI::AdaptiveTarget(float landingX, const std::vector<BonusItem>& bon
         {
             float safeTime = AI_URGENCY_DISTANCE / RACKET_SPEED; //Stima sul tempo necessario per raggiungere una pallina
 
-            //Se c'è una pallina, il safeTime diventa il tempo prima che essa cada
-            if (dangerousBall) { safeTime = (SCREEN_HEIGHT - dangerousBall->posY) / dangerousBall->velY; }
+            //Se c'è una pallina, il safeTime diventa il tempo prima che raggiunga la racchetta (non il fondo dello schermo: da lì è tardi)
+            if (dangerousBall) { safeTime = dangerousBall->TimeToRacket(); }
 
             //Calcola la distanza necessaria per prendere il bonus e poi raggiungere la pallina
             float distanceRacketBonus = std::abs(bonusX - racket.CenterX());
@@ -155,7 +159,7 @@ float RacketAI::AdaptiveTarget(float landingX, const std::vector<BonusItem>& bon
             if (totalDistance / RACKET_SPEED <= safeTime * AI_BONUS_TIME_MARGIN) { return bonusX; }
 
             //Se la distanza non è raggiungibile, andiamo direttamente a prendere la pallina
-            return landingX + RandomError();;
+            return AimAt(landingX, racket);
         }
 
         //Se non ci sono palline che stanno cadendo, andiamo direttamente a prendere il bonus
@@ -166,7 +170,7 @@ float RacketAI::AdaptiveTarget(float landingX, const std::vector<BonusItem>& bon
 
     //-----------------------------------------Priorità 3: colpire i mattoncini
 
-    //Calcola la posizione del mattoncino più conveniente e si posiziona a metà tra la posizione del mattoncino e della racchetta
+    //Calcola la posizione del mattoncino più conveniente e si posiziona sotto di esso (x = centro del mattoncino)
     float brickX = BestBrickTargetX(level, racket);
     if (brickX >= 0.0f) { return brickX; }
 
@@ -180,10 +184,17 @@ float RacketAI::ComputeTarget(const Level& level, const std::vector<Ball>& balls
 
     const float landingX = predictor.GetLandingX(); //Dove il ballPredictor stima che atterrerà la pallina più pericolosa
 
+    //Nuova mira quando la pallina da inseguire cambia o sparisce (es. dopo il colpo, quando risale): vale per tutta la discesa successiva.
+    //Per una pallina che scende il tempo d'impatto cala a ogni frame; se aumenta (o la pallina sparisce) è iniziato un nuovo ciclo
+    const Ball* danger = FindMostDangerousBall(balls);
+    const float dangerTime = danger ? danger->TimeToRacket() : std::numeric_limits<float>::max();
+    if (dangerTime > lastDangerTime) { aimRel = RandomSigned() * AIM_MAX_REL; }
+    lastDangerTime = dangerTime;
+
     float targetX = -1.0f;
 
     //Segue solo la previsione della pallina
-    if (mode == RacketAIMode::BallPriority) { if (landingX >= 0.0f) { targetX = landingX + RandomError(); } }
+    if (mode == RacketAIMode::BallPriority) { if (landingX >= 0.0f) { targetX = AimAt(landingX, racket); } }
     
     //Bilancia pallina e bonus
     if (mode == RacketAIMode::Adaptive) { targetX = AdaptiveTarget(landingX, bonuses, balls, level, racket); }

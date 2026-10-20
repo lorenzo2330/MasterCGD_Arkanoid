@@ -9,6 +9,7 @@
 #include "../render/renderer2d.h"
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 
@@ -22,26 +23,26 @@ void BallPredictor::Update(const std::vector<Ball>& balls, const Level& level, f
     Predict(balls, level);
 }
 
-const void BallPredictor::Predict(const std::vector<Ball>& balls, const Level& level) {
-    
+const Ball* BallPredictor::FindMostDangerous(const std::vector<Ball>& balls)
+{
     const Ball* best = nullptr;
-    float bestY = 0;                //0 è il punto più alto dello schermo, quindi va bene usarlo come worst case
-
-    std::vector<const Ball*> vb = {};
+    float bestTime = std::numeric_limits<float>::max();
 
     for (const Ball& b : balls) {
-        if (b.on && b.velY >= 0.0f) {               //Considera solo le palline attive e che stanno cadendo
-            vb.push_back(&b);                                   //Memorizza la pallina (utile per mode == 2
-            if (b.posY > bestY) { bestY = b.posY; best = &b; }  //Pallina più pericolosa (posY più "bassa")
-        }
+        if (!IsThreat(b)) continue;
+        float t = b.TimeToRacket();                     //Tempo prima che raggiunga la racchetta (tiene conto della velocità)
+        if (t < bestTime) { bestTime = t; best = &b; }
     }
-    
-    //Stampa tutte le palline, con un colore diverso per la migliore
+    return best;
+}
+
+void BallPredictor::Predict(const std::vector<Ball>& balls, const Level& level) {
+
+    const Ball* best = FindMostDangerous(balls);
+
+    //Mode 2: simula tutte le palline minacciose (la migliore con colore diverso)
     if (mode == 2) {
-        for (const Ball* b : vb) {
-            if (best && b->posX == best->posX && b->posY == best->posY) { Simulate(*b, level, true); }
-            else { Simulate(*b, level, false); }
-        }
+        for (const Ball& b : balls) { if (IsThreat(b)) Simulate(b, level, &b == best); }
     }
     else if (best) Simulate(*best, level, true);
 }
@@ -66,6 +67,8 @@ void BallPredictor::Simulate(Ball ball, const Level& level, bool isBest)
 
     bool hasReachedEndScreen = false;
 
+    const size_t firstSegment = segments.size();    //Indice del primo segmento di questa traiettoria (con più palline, segments contiene tutte le traiettorie)
+
     int nBounce = 0;    //Numero di rimbalzi, se raggiunge PREDICTOR_MAX_BOUNCE interrompe la simulazione
 
     for (int step = 0; step < PREDICTOR_MAX_SIM && !hasReachedEndScreen && nBounce < PREDICTOR_MAX_BOUNCE; ++step)
@@ -87,7 +90,7 @@ void BallPredictor::Simulate(Ball ball, const Level& level, bool isBest)
         bool hitSideX = false, hitSideY = false, hasHitted = false;
         for (size_t i = 0; i < realBricks.size() && !hasHitted; ++i)
         {
-            //Se il mattoncino è attivo e collide con la pallina, lo disattiviamo e terminiamo la traiettoria
+            //Se il mattoncino è attivo e collide con la pallina, lo segniamo come colpito (solo nella maschera) e rimbalziamo: la simulazione continua
             if (brickAlive[i] && realBricks[i].on && CheckAABB(ball, realBricks[i], hitSideX, hitSideY)) {
                 if (hitSideX) ball.velX = -ball.velX;
                 if (hitSideY) ball.velY = -ball.velY;
@@ -107,12 +110,16 @@ void BallPredictor::Simulate(Ball ball, const Level& level, bool isBest)
             float denom = ball.posY - prevY;
             if (std::abs(denom) > 0.001f) { 
                 float t = (SCREEN_HEIGHT - prevY) / denom; 
-                landingX = prevX + t * (ball.posX - prevX);
+                if (isBest) landingX = prevX + t * (ball.posX - prevX);   //landingX appartiene solo alla pallina più pericolosa
             }
-            else { landingX = ball.posX; }
+            else if (isBest) { landingX = ball.posX; }
             hasReachedEndScreen = true;
         }
     }
+
+    //Posizione relativa di ogni segmento nella relativa traiettoria (0 -> inizio, 1 -> fine), usata per la dissolvenza
+    const float count = static_cast<float>(segments.size() - firstSegment);
+    for (size_t k = firstSegment; k < segments.size(); ++k) { segments[k].t = static_cast<float>(k - firstSegment) / count; }
 }
 
 void BallPredictor::Render(Renderer2D& r2d) const
@@ -124,13 +131,9 @@ void BallPredictor::Render(Renderer2D& r2d) const
 
     float accumulated = offset;
 
-    bool isBest = false;
-
     for (size_t i = 0; i < segments.size(); ++i)
     {
         const Segment& s = segments[i];
-
-        isBest = s.isBest;
 
         float dx = s.xf - s.xi;
         float dy = s.yf - s.yi;
@@ -144,16 +147,16 @@ void BallPredictor::Render(Renderer2D& r2d) const
             accumulated += len;
 
             if (!dashOn) {
-                float progress = static_cast<float>(i / segments.size());   //Alpha diminuisce verso la fine della traiettoria
-                r2d.DrawLine(s.xi, s.yi, s.xf, s.yf, PREDICTOR_LINE_THICKNESS, COLOR_PREDICTOR_LINE(progress, s.isBest));
+                //Alpha diminuisce verso la fine della traiettoria (s.t in [0, 1])
+                r2d.DrawLine(s.xi, s.yi, s.xf, s.yf, PREDICTOR_LINE_THICKNESS, COLOR_PREDICTOR_LINE(s.t, s.isBest));
             }
         }
     }
 
-    //Cerchio nel punto previsto
+    //Cerchio nel punto previsto (landingX è sempre quello della pallina più pericolosa)
     if (landingX >= 0.0f)
     {
         float pulse = PREDICTOR_END_PULSE(dashTimer);   //Per variare la grandezza del cerchio ("intensità")
-        r2d.DrawCircle(landingX, PREDICTOR_END_Y(pulse), PREDICTOR_END_RADIUS(pulse), COLOR_PREDICTOR_END(pulse, isBest));
+        r2d.DrawCircle(landingX, PREDICTOR_END_Y(pulse), PREDICTOR_END_RADIUS(pulse), COLOR_PREDICTOR_END(pulse, true));
     }
 }
